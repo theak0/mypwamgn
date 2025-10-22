@@ -1,0 +1,17 @@
+<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'>
+    <defs>
+        <radialGradient id='grad' cx='50%' cy='50%' r='50%' fx='50%' fy='50%'>
+            <stop offset='0%' style='stop-color:#ff00de' />
+            <stop offset='16%' style='stop-color:#ff8c00' />
+            <stop offset='33%' style='stop-color:#ffef00' />
+            <stop offset='50%' style='stop-color:#00ff00' />
+            <stop offset='66%' style='stop-color:#00ffff' />
+            <stop offset='83%' style='stop-color:#0000ff' />
+            <stop offset='100%' style='stop-color:#8a2be2' />
+        </radialGradient>
+    </defs>
+    <circle cx='50' cy='50' r='48' fill='url(#grad)' stroke='rgba(0,0,0,0.1)' stroke-width='2'/>
+    <circle cx='35' cy='40' r='5' fill='black' />
+    <circle cx='65' cy='40' r='5' fill='black' />
+    <path d='M 35 60 A 15 15 0 0 0 65 60' stroke='black' stroke-width='3' fill='none' />
+</svg>

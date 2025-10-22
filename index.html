@@ -1,0 +1,1903 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Meno-Guide App</title>
+	<link rel="icon" type="image/png" href="/favicon-96x96.png" sizes="96x96" />
+	<link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+	<link rel="shortcut icon" href="/favicon.ico" />
+	<link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png" />
+	<meta name="apple-mobile-web-app-title" content="Meno-Guide" />
+	<link rel="manifest" href="/site.webmanifest" />
+    <meta name="theme-color" content="#c8e6c9"/>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/react@18/umd/react.development.js"></script>
+    <script src="https://unpkg.com/react-dom@18/umd/react-dom.development.js"></script>
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+    <!-- PayPal SDK with your Sandbox Client ID -->
+    <script src="https://www.paypal.com/sdk/js?client-id=AfyJIoFJXhNceDKPAz_BgPnnp7NnoY3KqR1lTvlpWOP9Mvkbug-AoFNhSih7tOY3tRK3jv29lpnc1ky5&vault=true&intent=subscription"></script>
+    
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
+        import { getAuth, GoogleAuthProvider, signInWithPopup, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
+        import { getFirestore, doc, setDoc, getDoc, onSnapshot, collection } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+
+        const firebaseConfig = {
+            apiKey: "AIzaSyCoUAsxSTBThVtw7FbsPGAVWAmZsGjCnH0",
+            authDomain: "meno-guide-pro.firebaseapp.com",
+            projectId: "meno-guide-pro",
+            storageBucket: "meno-guide-pro.appspot.com",
+            messagingSenderId: "463592039861",
+            appId: "1:463592039861:web:fcda847817789f08bb65fc",
+            measurementId: "G-QEG0NG32D8"
+        };
+
+        // Initialize Firebase
+        const app = initializeApp(firebaseConfig);
+        const auth = getAuth(app);
+        const db = getFirestore(app);
+        const provider = new GoogleAuthProvider();
+
+        window.firebase = { auth, db, provider, signInWithPopup, onAuthStateChanged, signOut, doc, setDoc, getDoc, onSnapshot, collection };
+    </script>
+
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
+        
+        html, body, #root {
+            height: 100%;
+            width: 100%;
+            margin: 0;
+            padding: 0;
+            overflow: hidden;
+            font-family: 'Inter', sans-serif;
+        }
+
+        .text-shadow {
+            text-shadow: 1px 1px 3px rgba(0,0,0,0.1);
+        }
+
+        @keyframes lava-lamp-bubble {
+            0%, 100% {
+                transform: translateY(10px) rotate(-10deg);
+                border-radius: 60% 40% 30% 70% / 60% 30% 70% 40%;
+            }
+            25% {
+                transform: translateY(-5px) rotate(5deg);
+                border-radius: 40% 60% 70% 30% / 40% 70% 30% 60%;
+            }
+            50% {
+                transform: translateY(-15px) rotate(-5deg);
+                border-radius: 70% 30% 60% 40% / 70% 40% 60% 30%;
+            }
+            75% {
+                transform: translateY(5px) rotate(10deg);
+                border-radius: 30% 70% 40% 60% / 30% 60% 40% 70%;
+            }
+        }
+
+        @keyframes logo-wobble {
+            0%, 100% { border-radius: 42% 58% 70% 30% / 45% 45% 55% 55%; transform: translateY(0) rotateZ(0.01deg); }
+            34% { border-radius: 70% 30% 46% 54% / 30% 29% 71% 70%; transform: translateY(0) rotateZ(0.01deg); }
+            67% { border-radius: 100% 60% 60% 100% / 100% 100% 60% 60%; transform: translateY(0) rotateZ(0.01deg); }
+        }
+
+        .animate-logo-wobble {
+            animation: logo-wobble 5s ease-in-out infinite, gradient-shift 12s ease infinite;
+            position: relative;
+            overflow: hidden;
+        }
+
+        @keyframes gradient-shift {
+            0% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+            100% { background-position: 0% 50%; }
+        }
+        .animate-lava-lamp-bubble {
+            animation: lava-lamp-bubble 8s ease-in-out infinite, gradient-shift 12s ease infinite;
+            position: relative;
+            overflow: hidden;
+        }
+
+       .animate-green-wobble-bubble {
+            animation: wobble-edge 8s ease-in-out infinite, gradient-shift 10s ease infinite;
+        }
+
+        @keyframes wobble-edge {
+            0%, 100% { border-radius: 42% 58% 70% 30% / 45% 45% 55% 55%; transform: translate3d(0, 5px, 0) rotateZ(0.01deg); }
+            34% { border-radius: 70% 30% 46% 54% / 30% 29% 71% 70%; transform: translate3d(0, -5px, 0) rotateZ(0.01deg); }
+            50% { transform: translate3d(0, 2px, 0) rotateZ(0.01deg); }
+            67% { border-radius: 100% 60% 60% 100% / 100% 100% 60% 60%; transform: translate3d(0, -3px, 0) rotateZ(0.01deg); }
+        }
+        
+        .inner-particle {
+            position: absolute;
+            background: rgba(255, 255, 255, 0.7);
+            border-radius: 50%;
+            animation: move-particle 10s ease-in-out infinite;
+        }
+
+        @keyframes move-particle {
+            0%, 100% { transform: translate(0, 0); }
+            25% { transform: translate(15px, -10px); }
+            50% { transform: translate(-10px, 15px); }
+            75% { transform: translate(10px, 10px); }
+        }
+
+        .bubble-face {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            top: 0;
+            left: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            flex-direction: column;
+        }
+        .bubble-eye {
+            width: 8px;
+            height: 8px;
+            background: rgba(0,0,0,0.5);
+            border-radius: 50%;
+            position: absolute;
+            top: 35%;
+            animation: blink 5s infinite ease-in-out;
+        }
+        .bubble-eye:first-child {
+            left: 30%;
+        }
+        .bubble-eye:last-child {
+            right: 30%;
+        }
+        .bubble-mouth {
+            width: 30px;
+            height: 15px;
+            border-bottom: 3px solid rgba(0,0,0,0.5);
+            border-radius: 0 0 15px 15px;
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translateX(-50%);
+        }
+        
+        .bubble-face-logo .bubble-eye-logo{
+             width: 3px; height: 3px; top: 38%;
+        }
+         .bubble-face-logo .bubble-mouth-logo{
+             width: 12px; height: 6px; border-bottom-width: 2px; top: 55%;
+         }
+
+
+        @keyframes blink {
+            0%, 90%, 100% { transform: scaleY(1); }
+            95% { transform: scaleY(0.1); }
+        }
+
+        .water-background {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(to top, #e0f2f1, #c8e6c9);
+            overflow: hidden;
+            z-index: 0;
+        }
+        .wave {
+            background: rgba(255, 255, 255, 0.2);
+            border-radius: 1000% 1000% 0 0;
+            position: absolute;
+            width: 200%;
+            height: 12em;
+            animation: wave 10s -3s linear infinite;
+            transform: translate3d(0, 0, 0);
+            opacity: 0.8;
+            bottom: 0;
+            left: 0;
+        }
+        .wave:nth-of-type(2) {
+            bottom: -1.25em;
+            animation: wave 18s linear reverse infinite;
+            opacity: 0.8;
+        }
+        .wave:nth-of-type(3) {
+            bottom: -2.5em;
+            animation: wave 12s -1s linear infinite;
+            opacity: 0.6;
+        }
+         .wave:nth-of-type(4) {
+            bottom: -3.5em;
+            animation: wave 22s linear reverse infinite;
+            opacity: 0.5;
+        }
+
+        @keyframes wave {
+            2% { transform: translateX(1); }
+            25% { transform: translateX(-25%); }
+            50% { transform: translateX(-50%); }
+            75% { transform: translateX(-25%); }
+            100% { transform: translateX(1); }
+        }
+        
+        .fish {
+            position: absolute;
+            opacity: 0.4;
+            animation-name: swim;
+            animation-timing-function: linear;
+            animation-iteration-count: infinite;
+        }
+
+        @keyframes swim {
+            from { transform: translateX(-100%) scale(var(--fish-scale, 0.2)); }
+            to { transform: translateX(calc(100vw + 100%)) scale(var(--fish-scale, 0.2)); }
+        }
+        /* Custom scrollbar styling */
+        .custom-scrollbar::-webkit-scrollbar {
+            display: none; /* For Chrome, Safari and Opera */
+        }
+        .custom-scrollbar {
+            -ms-overflow-style: none;  /* IE and Edge */
+            scrollbar-width: none;  /* Firefox */
+        }
+    </style>
+</head>
+<body>
+    <div id="root"></div>
+
+    <script type="text/babel">
+        const { useState, useEffect, useRef, useCallback, useMemo } = React;
+
+        // --- PAYPAL PLAN IDs (SANDBOX) ---
+        const PAYPAL_PLAN_IDS = {
+          trial: 'P-2936578534012562KND2JN6Y',
+          yearly: 'P-7FK61399F5876832KND2JOMI',
+          monthly: 'P-4D37034808020190NND2JOWQ',
+        };
+
+        // --- STATIC SVG ICONS ---
+        const NewHomeIcon = ({ className }) => (<svg className={className} xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth="1.5" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" d="M2.25 12l8.954-8.955c.44-.439 1.152-.439 1.591 0L21.75 12M4.5 9.75v10.125c0 .621.504 1.125 1.125 1.125H9.75v-4.875c0-.621.504-1.125 1.125-1.125h2.25c.621 0 1.125.504 1.125 1.125V21h4.125c.621 0 1.125-.504 1.125-1.125V9.75M8.25 21h7.5" /></svg>);
+        const NewTrackerIcon = ({ className }) => (<svg className={className} xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth="1.5" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" d="M3.75 3v11.25A2.25 2.25 0 006 16.5h12M3.75 3h-1.5m1.5 0h16.5m0 0h1.5m-1.5 0v11.25A2.25 2.25 0 0118 16.5h-12a2.25 2.25 0 01-2.25-2.25V3M16.5 7.5l-3.75 3.75-2.25-2.25-3.75 3.75" /></svg>);
+        const NewLearnIcon = ({ className }) => (<svg className={className} xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth="1.5" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" d="M12 6.042A8.967 8.967 0 006 3.75c-1.052 0-2.062.18-3 .512v14.25A8.987 8.987 0 016 18c2.305 0 4.408.867 6 2.292m0-14.25a8.966 8.966 0 016-2.292c1.052 0 2.062.18 3 .512v14.25A8.987 8.987 0 0018 18a8.967 8.967 0 00-6 2.292m0-14.25v14.25" /></svg>);
+        const GamingControllerIcon = ({ className }) => (
+            <svg className={className} xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth="1.5" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" d="M19.5 12c0 3.314-2.686 6-6 6H10.5c-3.314 0-6-2.686-6-6s2.686-6 6-6h3c3.314 0 6 2.686 6 6z" />
+                <path strokeLinecap="round" strokeLinejoin="round" d="M8.25 15L6 17.25m12-2.25L18 17.25" />
+                <path strokeLinecap="round" strokeLinejoin="round" d="M9 12H6.75M17.25 12H15" />
+                <path strokeLinecap="round" strokeLinejoin="round" d="M12 9V6.75m0 9.5V15" />
+                <path strokeLinecap="round" strokeLinejoin="round" d="M14.25 9.75h.008v.008h-.008V9.75zm-4.5 0h.008v.008H9.75v-.008z" />
+            </svg>
+        );
+        const SettingsIcon = ({ className }) => (<svg className={className} xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth="1.5" stroke="currentColor"> <path strokeLinecap="round" strokeLinejoin="round" d="M9.594 3.94c.09-.542.56-.94 1.11-.94h2.593c.55 0 1.02.398 1.11.94l.213 1.281c.063.374.313.686.645.87.074.04.147.083.22.127.324.196.72.257 1.075.124l1.217-.456a1.125 1.125 0 011.37.49l1.296 2.247a1.125 1.125 0 01-.26 1.431l-1.003.827c-.293.24-.438.613-.438.995s.145.755.438.995l1.003.827c.424.35.534.954.26 1.431l-1.296 2.247a1.125 1.125 0 01-1.37.49l-1.217-.456c-.355-.133-.75-.072-1.076.124a6.57 6.57 0 01-.22.128c-.331.183-.581.495-.644.869l-.213 1.28c-.09.543-.56.941-1.11.941h-2.594c-.55 0-1.02-.398-1.11-.94l-.213-1.281c-.063-.374-.313-.686-.645-.87a6.52 6.52 0 01-.22-.127c-.324-.196-.72-.257-1.075-.124l-1.217.456a1.125 1.125 0 01-1.37-.49l-1.296-2.247a1.125 1.125 0 01.26-1.431l1.004-.827c.292-.24.437-.613.437-.995s-.145-.755-.437-.995l-1.004-.827a1.125 1.125 0 01-.26-1.431l1.296-2.247a1.125 1.125 0 011.37-.49l1.217.456c.355.133.75.072 1.076-.124.072-.044.146-.087.22-.128.332-.183.582-.495.644-.869l.214-1.281z" /> <path strokeLinecap="round" strokeLinejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" /></svg>);
+        const SpeakerIcon = ({ className }) => (<svg className={className} xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor"><path d="M3 9v6h4l5 5V4L7 9H3zm13.5 3c0-1.77-1.02-3.29-2.5-4.03v8.05c1.48-.73 2.5-2.25 2.5-4.02zM14 3.23v2.06c2.89.86 5 3.54 5 6.71s-2.11 5.85-5 6.71v2.06c4.01-.91 7-4.49 7-8.77s-2.99-7.86-7-8.77z"/></svg>);
+        const GoogleIcon = () => (
+            <svg className="w-6 h-6" viewBox="0 0 48 48">
+                <path fill="#FFC107" d="M43.611,20.083H42V20H24v8h11.303c-1.649,4.657-6.08,8-11.303,8c-6.627,0-12-5.373-12-12s5.373-12,12-12c3.059,0,5.842,1.154,7.961,3.039l5.657-5.657C34.046,6.053,29.268,4,24,4C12.955,4,4,12.955,4,24s8.955,20,20,20s20-8.955,20-20C44,22.659,43.862,21.35,43.611,20.083z"></path>
+                <path fill="#FF3D00" d="M6.306,14.691l6.571,4.819C14.655,15.108,18.961,12,24,12c3.059,0,5.842,1.154,7.961,3.039l5.657-5.657C34.046,6.053,29.268,4,24,4C16.318,4,9.656,8.337,6.306,14.691z"></path>
+                <path fill="#4CAF50" d="M24,44c5.166,0,9.86-1.977,13.409-5.192l-6.19-5.238C29.211,35.091,26.715,36,24,36c-5.202,0-9.619-3.317-11.283-7.946l-6.522,5.025C9.505,39.556,16.227,44,24,44z"></path>
+                <path fill="#1976D2" d="M43.611,20.083H42V20H24v8h11.303c-0.792,2.237-2.231,4.166-4.087,5.571l6.19,5.238C41.38,36.128,44,30.638,44,24C44,22.659,43.862,21.35,43.611,20.083z"></path>
+            </svg>
+        );
+
+
+        // --- NEW BUBBLE & ANIMATION COMPONENTS ---
+        const LogoBubble = () => (
+            <div className="w-7 h-7 animate-logo-wobble" style={{
+                background: 'linear-gradient(45deg, #ff00de, #ff8c00, #ffef00, #00ff00, #00ffff, #0000ff, #8a2be2)',
+                backgroundSize: '400% 400%',
+                boxShadow: '0 2px 5px rgba(0,0,0,0.2)',
+            }}>
+                <div className="bubble-face bubble-face-logo">
+                    <div className="bubble-eye bubble-eye-logo"></div>
+                    <div className="bubble-eye bubble-eye-logo"></div>
+                    <div className="bubble-mouth bubble-mouth-logo"></div>
+                </div>
+            </div>
+        );
+
+        const LavaLampBubble = () => (
+            <div className="w-full h-full relative flex items-center justify-center">
+                <div className="absolute w-28 h-28 animate-lava-lamp-bubble" style={{
+                    background: 'linear-gradient(45deg, #ff00de, #ff8c00, #ffef00, #00ff00, #00ffff, #0000ff, #8a2be2)',
+                    backgroundSize: '400% 400%',
+                    boxShadow: '0 5px 15px rgba(0,0,0,0.3)',
+                }}>
+                   <div className="inner-particle" style={{ width: '10px', height: '10px', top: '20%', left: '30%', animationDelay: '0s' }}></div>
+                   <div className="inner-particle" style={{ width: '5px', height: '5px', top: '50%', left: '60%', animationDelay: '-1s' }}></div>
+                   <div className="inner-particle" style={{ width: '8px', height: '8px', top: '70%', left: '20%', animationDelay: '-2s' }}></div>
+                   <div className="inner-particle" style={{ width: '6px', height: '6px', top: '30%', left: '80%', animationDelay: '-3s' }}></div>
+                   <div className="bubble-face">
+                        <div className="bubble-eye"></div>
+                        <div className="bubble-eye"></div>
+                        <div className="bubble-mouth"></div>
+                   </div>
+                </div>
+            </div>
+        );
+
+        const GreenLavaButton = () => (
+            <div className="w-full h-full relative flex items-center justify-center">
+                <div className="absolute w-full h-full animate-green-wobble-bubble" style={{
+                    background: 'linear-gradient(45deg, #a8e063, #56ab2f, #2e8b57, #3cb371)',
+                    backgroundSize: '400% 400%',
+                    boxShadow: '0 8px 20px rgba(0,0,0,0.2)',
+                }}>
+                </div>
+                <span className="relative z-10 text-4xl font-bold text-white tracking-tight">My Relief</span>
+            </div>
+        );
+
+        const Fish = ({ style }) => (
+            <svg style={style} className="fish" viewBox="0 0 100 50" xmlns="http://www.w3.org/2000/svg">
+                <path d="M99.25,24.13c0,0-15.39-1.33-28.84-0.84C59.9,23.68,51,28.5,41.67,28.5c-9.33,0-18.23-5.23-28.5-4.58C-1.83,24.58,0.75,25,0.75,25s-2-0.42,5.17-1.5c10-1.5,19.83,2.42,29.83,2.42c10,0,18.83-4.5,28.5-5.33c9.67-0.83,27.17,0.42,32.75,1.75C99,23.08,99.25,24.13,99.25,24.13z" fill="rgba(255,255,255,0.2)"/>
+            </svg>
+        );
+
+        const WaterBackground = () => (
+            <div className="water-background">
+                <div className="wave"></div>
+                <div className="wave"></div>
+                <div className="wave"></div>
+                <div className="wave"></div>
+                {[...Array(10)].map((_, i) => (
+                    <Fish key={i} style={{
+                        left: `${Math.random() * 100}%`,
+                        top: `${Math.random() * 100}%`,
+                        transform: `scale(${Math.random() * 0.2 + 0.1})`,
+                        animationDuration: `${Math.random() * 20 + 15}s`,
+                        animationDelay: `${Math.random() * -35}s`,
+                    }} />
+                ))}
+            </div>
+        );
+
+
+        // --- CONTENT DATA (Offline by design) ---
+        const learnContent = [
+            { id: 1, category: 'Symptom Management', title: "How can I stop these constant hot flashes and night sweats?", content: "A hot flash happens when fluctuating estrogen affects your brain's internal thermostat. To manage them, try avoiding triggers like caffeine, spicy food, and stress. Dress in layers. For immediate relief, practice slow, deep breathing. Menopause Hormone Therapy (MHT) is the most effective medical solution, but non-hormonal options also exist. Track your triggers to find patterns and discuss persistent symptoms with a menopause-informed doctor." },
+            { id: 2, category: 'Symptom Management', title: "My periods are all over the place. Is this normal for perimenopause?", content: "Yes, this is the hallmark of perimenopause. As your ovaries produce hormones less predictably, your cycles can become longer, shorter, heavier, or lighter. Heavy bleeding is common but should be checked by a doctor to rule out other issues. While frustrating, this irregularity is a normal part of the transition. Tracking your cycle can help you feel more in control and provide valuable data for your doctor." },
+            { id: 3, category: 'Symptom Management', title: "I feel like I have dementia. Is this \"brain fog\" real?", content: "Brain fog is absolutely real and very common. Estrogen plays a vital role in brain function, so when it fluctuates, it can impact memory, focus, and clarity. It's often made worse by the poor sleep and anxiety that also accompany this stage. To fight back, prioritize sleep, engage your brain with new activities, and fuel it with omega-3s. It's a temporary hormonal issue, not a sign of cognitive decline." },
+            { id: 4, category: 'Symptom Management', title: "Why can't I sleep through the night anymore?", content: "Menopausal sleep disruption is a cruel cycle. It's often caused by night sweats waking you up, but fluctuating progesterone (a calming hormone) and increased anxiety also play major roles. To improve your chances of good rest, create a strict sleep routine: cool, dark room; no screens before bed; and avoid caffeine/alcohol in the evening. If you're still struggling, speak to your doctor about solutions that can break the cycle." },
+            { id: 5, category: 'Symptom Management', title: "Why do my joints ache so much, especially in the morning?", content: "If you're waking up feeling stiff and sore, it's likely linked to menopause. Estrogen has an anti-inflammatory effect and helps with fluid regulation in your joints. As estrogen levels decline, you may experience more inflammation and aches. Gentle movement like yoga or swimming can help lubricate the joints. Regular strength training also supports joint health. If pain is severe, it's important to have it checked by a doctor." },
+            { id: 6, category: 'Treatment Options', title: "Is HRT (Hormone Replacement Therapy) safe to take?", content: "For most healthy women under 60 and within 10 years of menopause, modern Menopause Hormone Therapy (MHT/HRT) is considered safe. The benefits, like relief from severe symptoms and protection for your bones and heart, often outweigh the risks. Fears from outdated studies have been largely clarified. The key is personalization. A discussion with a knowledgeable doctor is the best way to decide if it's right for you." },
+            { id: 7, category: 'Treatment Options', title: "What can I take for menopause if I can't or don't want to take hormones?", content: "You have options! For hot flashes, doctors can prescribe non-hormonal medications like certain low-dose antidepressants (SSRIs), gabapentin, or newer drugs like Veozah. Cognitive Behavioral Therapy (CBT) has also shown great results. For vaginal symptoms, non-hormonal moisturizers are available. Lifestyle changes in diet and exercise also play a huge role in your overall well-being." },
+            { id: 8, category: 'Treatment Options', title: "What's the difference between \"bioidentical\" and \"body-identical\" hormones?", content: "\"Body-identical\" hormones (like 17-beta estradiol) are structurally identical to what your body makes and are regulated and prescribed by doctors. \"Bioidentical\" often refers to custom-compounded formulas that are not regulated by the FDA, meaning their safety and dosage can be inconsistent. For proven safety and efficacy, most menopause specialists recommend regulated, body-identical MHT." },
+            { id: 9, category: 'Treatment Options', title: "How do I find a doctor who actually understands menopause?", content: "Feeling dismissed is common, so advocating for yourself is key. Look for a NAMS Certified Menopause Practitioner (NCMP) in your area using their online database. Come to your appointment with a list of your symptoms and questions. If a doctor tells you this is \"just something you have to live with,\" it's a sign that you should seek a second opinion." },
+            { id: 10, category: 'Treatment Options', title: "Will I have to be on HRT forever?", content: "Not necessarily. The decision to start and stop MHT is a personal one made with your doctor. Some women use it for a few years to get through the worst of their symptoms, then taper off. Others may choose to stay on it for longer for the bone and heart health benefits. It's recommended to have an annual review with your doctor to reassess your health and decide if the treatment plan is still the best option for you." },
+            { id: 11, category: 'Mental & Emotional', title: "Why do I feel so anxious and on edge all the time?", content: "Perimenopausal anxiety is very real. Your hormones, estrogen and progesterone, help regulate mood chemicals in your brain like serotonin and GABA. As they fluctuate erratically, it can disrupt this delicate balance, leaving you in a state of high alert or panic. It's a physiological response, not a personal weakness. Deep breathing, reducing caffeine, and regular exercise can provide significant relief." },
+            { id: 12, category: 'Mental & Emotional', title: "Is \"meno-rage\" a real thing? I get so angry over nothing!", content: "Yes, \"meno-rage\" is a very real experience. The same hormonal fluctuations that cause anxiety can also shorten your fuse, leading to sudden, intense bursts of anger that feel out of your control. This is often exacerbated by poor sleep and feeling overwhelmed by other symptoms. Recognizing that it has a biological trigger is the first step. Mindfulness and stress-reduction techniques can help." },
+            { id: 13, category: 'Mental & Emotional', title: "I feel like I've lost myself. Who am I now?", content: "This is a profound and common feeling. You're not just dealing with physical symptoms, but a major identity shift. Your body is changing, your role in life may be shifting, and it can feel disorienting. This transition is an opportunity to redefine yourself on your own terms. It's a powerful time for introspection, setting new goals, and reconnecting with what truly brings you joy." },
+            { id: 14, category: 'Mental & Emotional', title: "How do I manage my mood swings at work and in my relationships?", content: "Focus on stabilizing your body: prioritize sleep, eat regular meals with protein to avoid blood sugar crashes, and schedule short breaks for walks or deep breathing. Then, practice proactive communication. Let your partner or a trusted colleague know you're going through a challenging time. A simple \"I'm having a tough day hormonally\" can create understanding." },
+            { id: 15, category: 'Mental & Emotional', title: "Can menopause cause depression?", content: "Women are at a higher risk of developing depression during the perimenopausal transition. While not everyone will experience clinical depression, feelings of persistent low mood and a loss of joy are common. If these feelings last for more than two weeks and interfere with your life, it is essential to seek help from a healthcare professional." },
+            { id: 16, category: 'Body Changes', title: "Why can't I lose this stubborn belly fat, no matter what I do?", content: "Menopausal weight gain is driven by slowing metabolism, insulin resistance, and hormonal shifts. The solution isn't just cardio. Focus on building muscle with strength training to boost your metabolism. Prioritize protein at every meal and manage stress, as the stress hormone cortisol directly contributes to belly fat." },
+            { id: 17, category: 'Body Changes', title: "Is my hair loss and thinning skin permanent?", content: "These changes are linked to the decline in collagen and estrogen. While you can't stop the clock, you can take steps to improve skin and hair health. Use hydrating skincare with retinol and hyaluronic acid, protect your skin with SPF, and ensure your diet is rich in protein and vitamins. There are also medical treatments available." },
+            { id: 18, category: 'Body Changes', title: "How do I protect my bones from osteoporosis after menopause?", content: "This is a critical long-term health action. Estrogen is essential for bone density. To protect yourself, ensure you get enough calcium and vitamin D. Most importantly, engage in regular weight-bearing exercises like walking, jogging, and—especially—strength training. This puts stress on the bones, signaling them to stay strong." },
+            { id: 19, category: 'Body Changes', title: "Why is my heart suddenly racing or skipping a beat?", content: "Heart palpitations can be very frightening, but they are often a benign symptom of perimenopause. Estrogen fluctuations can affect the autonomic nervous system, which regulates your heartbeat. While typically not dangerous, it's absolutely essential to get any new heart symptoms checked by a doctor to rule out any underlying cardiac issues." },
+            { id: 20, category: 'Body Changes', title: "What can I eat to help my menopause symptoms?", content: "Nutrition is a powerful tool. Focus on a whole-foods diet rich in lean protein and calcium. Phytoestrogens in soy and flaxseed may help some women with mild hot flashes. Crucially, limit sugar and processed foods, which can worsen inflammation, mood swings, and weight gain. Think of food as fuel to help your body navigate this change." },
+            { id: 21, category: 'Understanding the Stages', title: "What are the very first signs of perimenopause?", content: "The earliest signs often aren't hot flashes. Look for changes in your menstrual cycle (shorter, longer, heavier), new or worse PMS, trouble sleeping, and subtle shifts in mood, like increased anxiety or irritability. These can begin in your late 30s or early 40s and are the first clues your hormones are starting to fluctuate." },
+            { id: 22, category: 'Understanding the Stages', title: "What's the real difference between perimenopause and menopause?", content: "Perimenopause is the transitional phase before menopause, which can last for several years. During this time, your hormones fluctuate wildly, but you still have a menstrual cycle. Menopause is a single point in time—officially diagnosed 12 consecutive months after your final period. After that, you are postmenopausal." },
+            { id: 23, category: 'Understanding the Stages', title: "How long does this perimenopause stage last?", content: "The duration varies greatly. The average length is about 4 years, but for some, it can be as short as a few months or as long as 10 years. It typically begins in the mid-40s. There's no way to predict the exact timeline, but focusing on managing symptoms can make the entire process much smoother." },
+            { id: 24, category: 'Understanding the Stages', title: "How do I know when I'm officially in menopause?", content: "Menopause isn't a feeling; it's a specific milestone. You have officially reached menopause when you have gone 12 consecutive months without a single menstrual period. There's no test to confirm it—it's all about tracking time. The day you hit that one-year mark is your \"menopause day.\"" },
+            { id: 25, category: 'Understanding the Stages', title: "Do my symptoms just stop after I reach menopause?", content: "Not always. While the hormonal chaos of perimenopause ends, some symptoms can continue because your estrogen levels are now consistently low. Hot flashes can persist for years. Symptoms like vaginal dryness and increased risk for osteoporosis become long-term health considerations to manage proactively." },
+            { id: 26, category: 'Practical Lifestyle', title: "What is the best diet for managing menopause symptoms?", content: "Prioritize a Mediterranean-style diet: lean protein, whole grains, healthy fats (avocado, olive oil), and lots of fruits and vegetables. Protein is key at every meal to maintain muscle and keep you full. Calcium and Vitamin D-rich foods are vital for bone health. Crucially, minimize sugar, processed foods, and alcohol, as they can trigger symptoms." },
+            { id: 27, category: 'Practical Lifestyle', title: "Why is everyone telling me to start strength training?", content: "Strength training is non-negotiable in menopause. It's the most effective way to combat the trifecta of menopausal challenges: it builds muscle to boost your slowing metabolism, it puts stress on your bones to fight osteoporosis, and it improves insulin sensitivity, which helps reduce the storage of belly fat. Aim for 2-3 sessions per week." },
+            { id: 28, category: 'Practical Lifestyle', title: "Does alcohol really make menopause symptoms worse?", content: "For many women, yes. Alcohol can be a major trigger for hot flashes and night sweats. It can also disrupt your sleep architecture, worsening insomnia. Furthermore, it's a depressant, which can exacerbate mood swings and anxiety. Try cutting back or eliminating it for a few weeks to see how your body responds." },
+            { id: 29, category: 'Practical Lifestyle', title: "Are there any natural supplements that actually work?", content: "Magnesium Glycinate is often recommended for sleep, anxiety, and muscle aches. Vitamin D and Calcium are crucial for bone health. For hot flashes, some women find relief with Black Cohosh, though studies are mixed. Always consult with your doctor before starting any new supplement, as they can interact with other medications." },
+            { id: 30, category: 'Practical Lifestyle', title: "What can I do to actually get a good night's sleep?", content: "Reclaim your sleep with a solid routine. Keep your bedroom cool, dark, and quiet. Go to bed and wake up at the same time every day. Avoid caffeine after noon and limit screen time for an hour before bed. A calming pre-sleep ritual, like a warm bath or reading a book, can signal to your brain that it's time to wind down." },
+            { id: 31, category: 'Relationships', title: "How do I explain what I'm going through to my partner?", content: "Pick a calm time to talk. Use \"I feel\" statements, like \"When my hormones shift, I feel incredibly anxious, and it's not about you.\" Share a simple article from this app to help them understand the biological changes. Explain that you need their patience and support as your body goes through this major upheaval." },
+            { id: 32, category: 'Relationships', title: "My low libido is causing problems in our relationship. What can we do?", content: "Acknowledge this is a physical issue, not a rejection of your partner. Redefine intimacy beyond intercourse; focus on cuddling, massage, and other forms of touch to maintain connection. Medically, localized estrogen can help with dryness/pain, and sometimes testosterone therapy is effective for libido. It's a solvable problem." },
+            { id: 33, category: 'Relationships', title: "How can I handle feeling so irritable towards my family?", content: "When you feel the \"meno-rage\" building, create space. Step away and take slow, deep breaths. Proactively, explain to your family that your hormonal fluctuations can shorten your fuse and it's not their fault. Regular exercise is a fantastic outlet for this pent-up energy and frustration." },
+            { id: 34, category: 'Relationships', title: "How can I find other women who understand what I'm going through?", content: "You are not alone. Seek out online communities and forums dedicated to menopause. Social media has many menopause advocates and groups that offer support and shared experiences. Don't be afraid to open up to your close friends; you might be surprised to find they are going through the exact same things." },
+            { id: 35, category: 'Relationships', title: "How do we navigate intimacy now that sex is painful?", content: "Painful sex (dyspareunia) is a common and treatable symptom. Use a high-quality lubricant every time. Talk to your doctor about highly effective and safe localized estrogen (creams, pessaries) which restores tissue health. Once the fear of pain is gone, you can focus on rediscovering pleasure together." },
+            { id: 36, category: 'Workplace', title: "How do I handle a hot flash in the middle of a work meeting?", content: "Stay calm and be prepared. Dress in layers. Keep a small personal fan at your desk or in your bag. Have a glass of ice water nearby. If you feel one coming on, focus on slow, deep breathing to calm your nervous system. Knowing you have a toolkit at the ready can significantly reduce the anxiety around having one in public." },
+            { id: 37, category: 'Workplace', title: "My brain fog is making me feel incompetent at my job. What can I do?", content: "Fight brain fog with systems. Rely on calendars, to-do lists, and reminders more than ever. Before meetings, write down key talking points. Break complex tasks into smaller, manageable steps and avoid multitasking. Be kind to yourself; this is a temporary neurological effect of hormonal shifts, not a reflection of your true abilities." },
+            { id: 38, category: 'Workplace', title: "Should I tell my boss or HR about my menopause symptoms?", content: "This is a personal decision. If symptoms are impacting your work, it may be beneficial. Frame it as a a temporary health issue. You could say, \"I'm managing a health condition with some temporary symptoms. I'm developing strategies to manage it, but wanted to make you aware.\" Many workplaces are becoming more aware and may offer accommodations." },
+            { id: 39, category: 'Workplace', title: "How can I stay productive when I'm exhausted from lack of sleep?", content: "Work smarter, not harder. Prioritize your most demanding tasks for when you have the most energy. Take short, frequent breaks to walk around and get fresh air. Avoid saving difficult tasks for the end of the day. A 15-20 minute \"power nap\" during your lunch break can be incredibly restorative if your work situation allows." },
+            { id: 40, category: 'Diet & Nutrition', title: "What is the single best diet for menopause and weight gain?", content: "There's no single 'menopause diet,' but a Mediterranean style of eating is your best strategy. Focus on whole foods: lean protein, lots of colorful vegetables, fruits, and healthy fats like olive oil and avocados. This pattern helps manage weight, supports heart health, and fights inflammation. It's a sustainable way of fueling your body." },
+            { id: 41, category: 'Diet & Nutrition', title: "Why is protein so important now, and how much do I need?", content: "Protein is your new best friend. After 40, you start losing muscle mass, which slows your metabolism. Eating enough protein helps preserve that precious muscle and keeps you feeling fuller for longer, which helps control cravings. Aim for about 20-30 grams of protein with every meal from sources like chicken, fish, eggs, Greek yogurt, and lentils." },
+            { id: 42, category: 'Diet & Nutrition', title: "What specific foods can help with my hot flashes?", content: "Foods rich in phytoestrogens, plant-based compounds that weakly mimic estrogen, may help some women. Try incorporating whole soy foods like edamame and tofu, as well as ground flaxseeds and chickpeas into your diet. The effect isn't the same for everyone, but adding these nutrient-dense foods is a healthy step regardless." },
+            { id: 43, category: 'Diet & Nutrition', title: "What foods should I absolutely avoid to feel better?", content: "Your body is more sensitive now. Common triggers that can worsen symptoms include sugar, ultra-processed foods, excessive caffeine, and alcohol. These can spike your blood sugar, disrupt sleep, and increase inflammation. Try reducing one at a time to see what impacts you most. Many women find cutting back on sugar and alcohol alone makes a big difference." },
+            { id: 44, category: 'Diet & Nutrition', title: "Is soy good or bad for me during menopause?", content: "This is a big myth! For most women, whole soy foods are not only safe but beneficial. Soy contains phytoestrogens called isoflavones which can help with hot flashes and support heart health. Focus on whole soy sources like edamame, tofu, and tempeh, rather than highly processed soy products. If you have a history of estrogen-positive breast cancer, discuss it with your doctor." },
+            { id: 45, category: 'Diet & Nutrition', title: "How do I get enough calcium for my bones if I don't eat dairy?", content: "Protecting your bones is crucial. Excellent non-dairy calcium sources include fortified plant milks (almond, soy), firm tofu, leafy greens like kale, canned sardines or salmon (with bones), and sesame seeds (tahini). Remember you also need Vitamin D to absorb that calcium, so look for fortified foods or consider a supplement." },
+            { id: 46, category: 'Diet & Nutrition', title: "Is intermittent fasting a good idea for women over 40?", content: "It can be tricky. For some women in perimenopause, long fasting windows can increase the stress hormone cortisol, which can worsen symptoms and encourage belly fat storage. If you want to try it, start with a shorter fast, like 12-14 hours (e.g., 7 pm to 9 am). Above all, listen to your body and focus on eating nutrient-dense food." },
+            { id: 47, category: 'Diet & Nutrition', title: "How important is water, and how much should I really be drinking?", content: "Water is more important than ever. Dehydration can trigger headaches, fatigue, and brain fog, and can worsen dry skin. It can also help reduce bloating. Aim for around 8-10 glasses (about 2-2.5 liters) per day. If you have night sweats, you may need even more to replenish lost fluids. Keep a water bottle with you at all times." }
+        ];
+
+
+        const reliefFlowData = {
+            'overheating': {
+                prompt: "What's happening with the heat?",
+                options: {
+                    'hot-flash': {
+                        label: "Hot flash (quick heat spike)",
+                        steps: [
+                            { title: "Quick Physical Reset", content: "Run cold water on your wrists for 60 seconds (primary pulse points)." },
+                            { title: "Mind & Breath Focus", content: "\"Sip and Blow\" Breath: Exhale slowly as if blowing out a candle on a cake. Repeat 5 times." },
+                            { title: "Hydration/Snack Check", content: "Sip Ice-Cold Water: Hydration helps regulate temperature. Take 5 slow, deep sips now." },
+                            { title: "Body Posture/Movement", content: "Arm Pit Cooling: Gently lift your arms away from your body to allow air to circulate and cool your underarms." },
+                            { title: "Environmental Change", content: "Aim a Fan: Locate the nearest fan or a window. Direct the cool air flow onto your face and chest." },
+                            { title: "Affirmation/Reframe", content: "Affirmation: Silently repeat, \"This wave will pass.\" Focus on the word 'pass' until the peak subsides." },
+                            { title: "Safety & Doctor Note", content: "SAFETY CHECK: If accompanied by chest pain or profound dizziness, contact a doctor immediately." },
+                            { title: "Quick Distraction", content: "Pop Some Bubbles: Need a mental break from the heat? Tap here for the simple relaxation game!" }
+                        ]
+                    },
+                    'night-sweats': {
+                        label: "Night sweats",
+                        steps: [
+                            { title: "Quick Physical Reset", content: "Cool Your Neck: Flip the pillow and place a damp, cool cloth (if available) on the back of your neck." },
+                            { title: "Mind & Breath Focus", content: "No-Judgment Acknowledgment: Close your eyes and silently acknowledge the feeling of dampness without irritation." },
+                            { title: "Hydration/Snack Check", content: "Check Sugar: Do not eat, but note if your last meal was high in sugar. High sugar before bed can trigger sweats." },
+                            { title: "Body Posture/Movement", content: "Foot Wiggle: Gently wiggle your toes and ankles for 30 seconds to release tension without full movement." },
+                            { title: "Environmental Change", content: "Remove Layers: Immediately take off your top layer of clothing and keep a light cotton sheet handy." },
+                            { title: "Affirmation/Reframe", content: "Reframe: Silently repeat, \"I am safe and cooling down.\" Focus on the word 'safe'." },
+                            { title: "Safety & Doctor Note", content: "SAFETY CHECK: Discuss persistent, drenching night sweats with your doctor to rule out other causes." },
+                            { title: "Quick Distraction", content: "Pop Some Bubbles: Can't fall back asleep? Tap here for a quick distraction to reset your mind." }
+                        ]
+                    },
+                    'constant-warmth': {
+                        label: "General constant warmth",
+                        steps: [
+                            { title: "Quick Physical Reset", content: "Ice Cube Hold: Hold an ice cube tightly in your hand. The intense feeling can draw focus away from the overall heat." },
+                            { title: "Mind & Breath Focus", content: "Focus on the Out-Breath: Close your eyes and make the sound of the wind (a light 'whoosh') on your exhale." },
+                            { title: "Hydration/Snack Check", content: "Avoid Warm Drinks: Set a goal to only drink room temperature or cool water for the next 30 minutes." },
+                            { title: "Body Posture/Movement", content: "Shoulder Drop: Gently slump your shoulders down and back, releasing heat and tension from your upper body." },
+                            { title: "Environmental Change", content: "Adjust Lighting: Dim the lights, if possible, as bright light can sometimes be perceived as increasing warmth." },
+                            { title: "Affirmation/Reframe", content: "Affirmation: Silently repeat, \"My body is finding its balance.\"" },
+                            { title: "Safety & Doctor Note", content: "SAFETY CHECK: If paired with sudden, unexplained weight changes, contact your doctor for a check-up." },
+                            { title: "Quick Distraction", content: "Pop Some Bubbles: Need a gentle mental cool-down? Tap here for the simple relaxation game!" }
+                        ]
+                    },
+                }
+            },
+            'anxiety': {
+                prompt: "How are you feeling?",
+                options: {
+                    'irritable': {
+                        label: "Irritable and snappy",
+                        steps: [
+                            { title: "Quick Physical Reset", content: "Grip and Release: Clench your fists tightly for 5 seconds, then rapidly open and shake your hands 3 times." },
+                            { title: "Mind & Breath Focus", content: "Box Breathing: Inhale 4, Hold 4, Exhale 4, Pause 4. Repeat 3 times to stabilize your rhythm." },
+                            { title: "Hydration/Snack Check", content: "Check for Hunger: If you haven't eaten in 3+ hours, grab 5 almonds or a small piece of cheese for quick blood sugar stability." },
+                            { title: "Body Posture/Movement", content: "Neck Release: Gently drop your chin to your chest. Slowly roll your right ear toward your right shoulder, then back to center." },
+                            { title: "Environmental Change", content: "Step Away: Physically move to a completely different spot (another room, or stand outside) for 2 minutes." },
+                            { title: "Affirmation/Reframe", content: "Affirmation: Silently repeat, \"I choose calm.\" This helps reassert mental control." },
+                            { title: "Safety & Doctor Note", content: "SAFETY CHECK: If this irritability becomes frequent and escalates to uncontrolled rage, seek immediate professional help." },
+                            { title: "Quick Distraction", content: "Pop Some Bubbles: Need to release that tension in a safe space? Tap here to pop away your stress in the game!" }
+                        ]
+                    },
+                    'panic': {
+                        label: "Panic/Anxiety",
+                        steps: [
+                            { title: "Quick Physical Reset", content: "Splash Cold Water: Splash your face with cold water 3 times. This triggers the 'mammalian dive reflex' which instantly lowers heart rate." },
+                            { title: "Mind & Breath Focus", content: "5-4-3-2-1 Grounding: Name 5 things you can see, 4 things you can feel (texture), 3 things you can hear, 2 things you can smell, and 1 thing you can taste." },
+                            { title: "Hydration/Snack Check", content: "Sip Water Slowly: Take very small, controlled sips of water. The physical act of sipping can interrupt the panic breathing pattern." },
+                            { title: "Body Posture/Movement", content: "Foot Press: Plant both feet firmly on the floor and press down hard for 10 seconds. This anchors you to the present moment." },
+                            { title: "Environmental Change", content: "Remove Noise: If there is chaotic noise (TV, radio), turn it off or put on simple, slow, instrumental music." },
+                            { title: "Affirmation/Reframe", content: "Affirmation: Silently repeat, \"I am here, I am safe.\"" },
+                            { title: "Safety & Doctor Note", content: "SAFETY CHECK: If you feel profound chest tightness or fear of losing control, seek medical attention immediately." },
+                            { title: "Quick Distraction", content: "Pop Some Bubbles: Focus your anxious energy! Tap here for a quick, calming distraction game." }
+                        ]
+                    },
+                    'focus-stress': {
+                        label: "Struggling to focus due to stress",
+                        steps: [
+                            { title: "Quick Physical Reset", content: "Rub Ear Lobes: Gently massage your ear lobes between your thumb and forefinger for 30 seconds to stimulate blood flow." },
+                            { title: "Mind & Breath Focus", content: "The Hum Technique: Take a deep breath and hum a sustained, low note on the exhale. The vibration is deeply soothing." },
+                            { title: "Hydration/Snack Check", content: "Avoid Caffeine: Acknowledge your last coffee. Do not consume any more caffeine for the next hour to reduce mental \"chatter.\"" },
+                            { title: "Body Posture/Movement", content: "Stand and Shake: Stand up, shake your hands and arms vigorously for 15 seconds to release pent-up tension." },
+                            { title: "Environmental Change", content: "De-Clutter: Clear the 3 most distracting items from your immediate desktop or workspace." },
+                            { title: "Affirmation/Reframe", content: "Reframe: Silently repeat, \"I focus on one thing now.\"" },
+                            { title: "Safety & Doctor Note", content: "SAFETY CHECK: If lack of focus is suddenly preventing you from basic, necessary tasks, please seek medical advice." },
+                            { title: "Quick Distraction", content: "Pop Some Bubbles: Need a simple task to reboot your concentration? Tap here for the focus game!" }
+                        ]
+                    },
+                }
+            },
+            'sleep': {
+                prompt: "What's the sleep issue?",
+                options: {
+                    'cant-fall-asleep': {
+                        label: "Trouble falling asleep",
+                        steps: [
+                            { title: "Quick Physical Reset", content: "Warm Feet Hack: If your feet feel cold, put on a pair of warm, loose socks. Warm feet help trigger sleep signals." },
+                            { title: "Mind & Breath Focus", content: "\"Boring\" Counting: Count backward slowly from 100 in your mind. If you lose count, start over. Keep it monotonous." },
+                            { title: "Hydration/Snack Check", content: "No Water Now: Stop drinking any liquids 1 hour before you want to be asleep to prevent night waking for the bathroom." },
+                            { title: "Body Posture/Movement", content: "Passive Stretch: Lie on your back, bring your knees to your chest, hug them gently for 30 seconds, then release." },
+                            { title: "Environmental Change", content: "The 15-Minute Rule: If you are awake after 15 minutes, get out of bed. Do a boring, non-stimulating task in dim light until you feel sleepy, then return." },
+                            { title: "Affirmation/Reframe", content: "Affirmation: Silently repeat, \"My body knows how to rest.\"" },
+                            { title: "Safety & Doctor Note", content: "SAFETY CHECK: Persistent insomnia (lasting over 2 weeks) requires discussion with your doctor for sleep hygiene or specialist referral." },
+                            { title: "Quick Distraction", content: "Pop Some Bubbles: Can't switch off your mind? Tap here for a gentle, rhythmic game to distract your thoughts." }
+                        ]
+                    },
+                    'waking-early': {
+                        label: "Waking up too early",
+                        steps: [
+                            { title: "Quick Physical Reset", content: "Yawn Intentionally: Intentionally fake a big, loud yawn. Repeat 3 times. This helps relax the muscles around your jaw and throat." },
+                            { title: "Mind & Breath Focus", content: "Longer Exhale: Breathe in normally, then make your exhale twice as long as your inhale. Repeat until your heart rate slows." },
+                            { title: "Hydration/Snack Check", content: "Small Protein Snack: If you are ravenous, a few nuts or a spoon of peanut butter may stabilize morning blood sugar." },
+                            { title: "Body Posture/Movement", content: "Savasana Pose: Lie flat on your back, arms slightly away from your body, palms up. Imagine melting into the mattress." },
+                            { title: "Environmental Change", content: "Block Light: Ensure zero light is entering the room (use a sleep mask or extra curtain). Blue light exposure signals \"wake up.\"" },
+                            { title: "Affirmation/Reframe", content: "Reframe: Silently repeat, \"The rest I get now is enough.\" Accept the wakefulness without judgment." },
+                            { title: "Safety & Doctor Note", content: "SAFETY CHECK: Early morning awakening can be a key sign of clinical depression. If this is paired with low mood, contact a professional." },
+                            { title: "Quick Distraction", content: "Pop Some Bubbles: Frustrated? Tap here for a brief, soothing activity to change your mental state." }
+                        ]
+                    },
+                    'night-sweats-sleep': {
+                        label: "Night sweats are the main problem",
+                        steps: [
+                            { title: "Quick Physical Reset", content: "Cool Water Sip: Take 3 small sips of cool water and wipe your face with a towel. Do not get up and turn on lights." },
+                            { title: "Mind & Breath Focus", content: "The Calm Reassurance: Close your eyes and silently repeat the phrase, \"I am cooling down now.\" Focus only on the word 'cooling.'." },
+                            { title: "Hydration/Snack Check", content: "Check Bedside: Ensure you have a cup of ice water (or a cooling pack) and a towel easily accessible on your nightstand." },
+                            { title: "Body Posture/Movement", content: "Simple Clench: Tense all the muscles in your toes, hold for 5 seconds, and release completely. Do not move other muscles." },
+                            { title: "Environmental Change", content: "Adjust the Window: Open the window a tiny crack if possible, or check that air conditioning is directed away from the bed." },
+                            { title: "Affirmation/Reframe", content: "Affirmation: Silently repeat, \"I accept this moment.\"" },
+                            { title: "Safety & Doctor Note", content: "SAFETY CHECK: If these sweats are new and intense, always consult your doctor to ensure there are no underlying infections." },
+                            { title: "Quick Distraction", content: "Pop Some Bubbles: Need a mindful activity to get you back to a resting state? Tap here for the gentle game." }
+                        ]
+                    },
+                }
+            },
+            'energy': {
+                prompt: "What about your energy?",
+                options: {
+                    'fatigue': {
+                        label: "Overwhelming physical fatigue",
+                        steps: [
+                            { title: "Quick Physical Reset", content: "Energy Rub: Rub your hands together vigorously until warm, then place palms over your closed eyes for 30 seconds." },
+                            { title: "Mind & Breath Focus", content: "Sigh of Relief: Take a deep breath and release it with a loud, audible sigh. Repeat 3 times to release physical effort." },
+                            { title: "Hydration/Snack Check", content: "Get a Quick Carb/Protein Mix: Eat a small handful of crackers and peanut butter, or half a banana, for quick energy." },
+                            { title: "Body Posture/Movement", content: "Stand and Stretch: Stand up and do 10 gentle calf raises or shoulder rolls to increase circulation." },
+                            { title: "Environmental Change", content: "Change Your View: Move to a chair facing a window or a piece of art instead of your computer/TV screen." },
+                            { title: "Affirmation/Reframe", content: "Affirmation: Silently repeat, \"I will act on one task.\" Don't focus on the entire day." },
+                            { title: "Safety & Doctor Note", content: "SAFETY CHECK: Chronic, crushing fatigue is a primary symptom of thyroid or iron deficiency. See your doctor for bloodwork." },
+                            { title: "Quick Distraction", content: "Pop Some Bubbles: Too tired for a complex task? Tap here for a simple, engaging game to gently wake up your mind." }
+                        ]
+                    },
+                    'brain-fog': {
+                        label: "Mental 'brain fog' and poor memory",
+                        steps: [
+                            { title: "Quick Physical Reset", content: "Scent Reset: Take a sharp inhale of a stimulating scent (e.g., strong soap, lemon zest, or mint)." },
+                            { title: "Mind & Breath Focus", content: "Backward Counting: Count backward slowly from 50 to 0 in your head. This focused mental task helps break the haze." },
+                            { title: "Hydration/Snack Check", content: "Drink Water: Dehydration is a major fog trigger. Sip a full glass of water over the next 5 minutes." },
+                            { title: "Body Posture/Movement", content: "Clap Hands: Clap your hands loudly 5 times. The sharp noise and movement can increase instant alertness." },
+                            { title: "Environmental Change", content: "Open a Window: Let fresh air in. Stale, warm air can contribute to lethargy and brain fog." },
+                            { title: "Affirmation/Reframe", content: "Reframe: Silently repeat, \"My mind is clear.\"" },
+                            { title: "Safety & Doctor Note", content: "SAFETY CHECK: If memory loss is rapid or you feel profoundly disoriented, speak with your primary care doctor immediately." },
+                            { title: "Quick Distraction", content: "Pop Some Bubbles: Need a quick mental task to reboot your focus? Tap here for the simple game." }
+                        ]
+                    },
+                    'sluggish': {
+                        label: "Sluggish after meals",
+                        steps: [
+                            { title: "Quick Physical Reset", content: "Facial Pressure: Place your fingertips on your temples and apply gentle, circular pressure for 30 seconds." },
+                            { title: "Mind & Breath Focus", content: "Post-Meal Breath: Place your hand on your diaphragm. Take 3 slow, deep breaths, pushing your belly out on the inhale. This aids digestion." },
+                            { title: "Hydration/Snack Check", content: "Check Sugar Intake: Note if you just ate a high-sugar meal. Plan to add more protein and fiber to your next meal." },
+                            { title: "Body Posture/Movement", content: "Light Walk: Take a 5-minute slow walk around the room or office. Light movement helps blood sugar regulation." },
+                            { title: "Environmental Change", content: "Adjust Posture: Ensure you are sitting up straight and not slumped over, which can restrict breathing and digestion." },
+                            { title: "Affirmation/Reframe", content: "Affirmation: Silently repeat, \"I feel light and energized.\"" },
+                            { title: "Safety & Doctor Note", content: "SAFETY CHECK: If you regularly feel intense dizziness or faintness after eating, consult your doctor to check for blood sugar issues." },
+                            { title: "Quick Distraction", content: "Pop Some Bubbles: Need a light, engaging activity while you wait for your energy to stabilize? Tap here for the game." }
+                        ]
+                    },
+                }
+            },
+            'mood': {
+                prompt: "How's your mood right now?",
+                options: {
+                    'sad': {
+                        label: "Suddenly sad or tearful",
+                        steps: [
+                            { title: "Quick Physical Reset", content: "Hold an Ice Pack: Press an ice pack or a cold drink can to your cheekbone or forearm for 10 seconds." },
+                            { title: "Mind & Breath Focus", content: "Name the Feeling: Say, out loud or in your head, \"I am feeling [emotion] right now.\" Acknowledging the feeling helps lessen its immediate grip." },
+                            { title: "Hydration/Snack Check", content: "Avoid Alcohol/Sugar: Do not reach for quick-fix emotional comfort foods or drinks. Choose water or herbal tea." },
+                            { title: "Body Posture/Movement", content: "Change Your Facial Expression: Force a slight smile for 30 seconds. Even a fake smile can send positive signals to the brain." },
+                            { title: "Environmental Change", content: "Seek Light: Immediately go to a window or turn on the brightest light in the room (not a phone/screen)." },
+                            { title: "Affirmation/Reframe", content: "Affirmation: Silently repeat, \"This feeling is temporary, I am strong.\"" },
+                            { title: "Safety & Doctor Note", content: "SAFETY CHECK: If these feelings include thoughts of harming yourself, please call a crisis line or emergency service immediately." },
+                            { title: "Quick Distraction", content: "Pop Some Bubbles: Need a small, simple activity to change the flow of your thoughts? Tap here for the gentle game." }
+                        ]
+                    },
+                    'swings': {
+                        label: "Intense, rapid mood swings",
+                        steps: [
+                            { title: "Quick Physical Reset", content: "Gentle Self-Hug: Cross your arms and gently tap your shoulders alternately, left, right, left, right (like butterfly tapping)." },
+                            { title: "Mind & Breath Focus", content: "The Anchor Word: Choose a positive word (e.g., \"Steady,\" \"Calm,\" \"Center\") and repeat it silently for 60 seconds until the emotional wave subsides." },
+                            { title: "Hydration/Snack Check", content: "Avoid News/Social Media: Acknowledge that screens can trigger rapid emotional shifts. Put the phone away for 10 minutes." },
+                            { title: "Body Posture/Movement", content: "Grounding Walk: Take 10 steps, focusing intensely on the feeling of your feet making contact with the floor." },
+                            { title: "Environmental Change", content: "Tidy One Spot: Tidy a tiny, visible area (like the corner of a table). Completing a small task restores a sense of control." },
+                            { title: "Affirmation/Reframe", content: "Reframe: Silently repeat, \"I am responding, not reacting.\"" },
+                            { title: "Safety & Doctor Note", content: "SAFETY CHECK: Uncontrollable and dramatic mood swings are best discussed with a specialist (therapist/psychiatrist) in hormone shifts." },
+                            { title: "Quick Distraction", content: "Pop Some Bubbles: Need a simple rhythmic action to stabilize your thoughts? Tap here for the focus game." }
+                        ]
+                    },
+                    'flat': {
+                        label: "Flat or lack motivation",
+                        steps: [
+                            { title: "Quick Physical Reset", content: "Clap and Shake: Clap your hands 5 times loudly. Then, shake your hands vigorously for 10 seconds." },
+                            { title: "Mind & Breath Focus", content: "Listen to Stimulating Sound: Put on a piece of upbeat, motivating music (not relaxing) for 3 minutes to activate your senses." },
+                            { title: "Hydration/Snack Check", content: "Change Your Drink: Switch from water/tea to sparkling water with a slice of lemon or lime for a stimulating sensation." },
+                            { title: "Body Posture/Movement", content: "Posture of Power: Stand tall, chest slightly out, hands on your hips (superhero pose) for 60 seconds." },
+                            { title: "Environmental Change", content: "Add Color: Look for or place a brightly colored object near you. Color can stimulate energy." },
+                            { title: "Affirmation/Reframe", content: "Affirmation: Silently repeat, \"I choose to move now.\"" },
+                            { title: "Safety & Doctor Note", content: "SAFETY CHECK: A persistent lack of motivation or joy that lasts for weeks may be a sign of depression. Please talk to your doctor." },
+                            { title: "Quick Distraction", content: "Pop Some Bubbles: Need a zero-effort task that feels good to complete? Tap here for the quick, engaging game." }
+                        ]
+                    },
+                }
+            }
+        };
+
+        // --- CORE COMPONENTS ---
+
+        const PayPalButtonComponent = ({ planId, onSubscribed, onError }) => {
+            const paypalRef = useRef();
+
+            useEffect(() => {
+                let paypalButtonsInstance = null;
+                
+                if (window.paypal && window.paypal.Buttons) {
+                    paypalButtonsInstance = window.paypal.Buttons({
+                        createSubscription: (data, actions) => {
+                            return actions.subscription.create({ 'plan_id': planId });
+                        },
+                        onApprove: (data, actions) => {
+                            console.log('Subscription Approved:', data);
+                            alert('Thank you for subscribing! Your access has been unlocked.');
+                            onSubscribed();
+                        },
+                        onError: (err) => {
+                            console.error("PayPal button error:", err);
+                            onError();
+                        }
+                    });
+
+                    if (paypalRef.current) {
+                        paypalRef.current.innerHTML = ""; // Clean up previous renders
+                        paypalButtonsInstance.render(paypalRef.current).catch(err => {
+                            console.error("Failed to render PayPal buttons:", err);
+                            onError();
+                        });
+                    }
+                } else {
+                    onError();
+                }
+
+                return () => {
+                    if (paypalButtonsInstance && typeof paypalButtonsInstance.close === 'function') {
+                        paypalButtonsInstance.close().catch(err => {
+                           console.error("Error cleaning up PayPal buttons:", err);
+                        });
+                    }
+                };
+            }, [planId, onSubscribed, onError]);
+
+            return <div ref={paypalRef}><div className="text-center p-4 text-gray-600">Loading Payment Options...</div></div>;
+        };
+
+
+        const SubscriptionGate = ({ onSubscribed, trialUsed }) => {
+            const [selectedPlan, setSelectedPlan] = useState(null);
+            const [paypalError, setPaypalError] = useState(false);
+
+            const handlePlanSelection = (plan) => {
+                setPaypalError(false); // Reset error on new selection
+                setSelectedPlan(plan);
+            };
+            
+            const handlePayPalError = () => {
+                setPaypalError(true);
+            };
+
+            if (selectedPlan) {
+                let planName = '';
+                if (selectedPlan === 'monthly') planName = 'Monthly Pro Plan';
+                if (selectedPlan === 'yearly') planName = 'Yearly Pro Plan';
+                if (selectedPlan === 'trial') planName = '3-Day Free Trial';
+
+                return (
+                    <div className="flex flex-col items-center justify-start min-h-full text-center p-8 pt-12 text-shadow relative z-10">
+                         <h2 className="text-4xl font-bold mb-2 text-gray-800">Confirm Subscription</h2>
+                         <p className="text-lg mb-6 max-w-md text-gray-700">You've selected the <span className="font-bold">{planName}</span>. Complete your purchase below.</p>
+                         <div className="w-full max-w-xs mx-auto">
+                            {!paypalError ? (
+                                <PayPalButtonComponent 
+                                    planId={PAYPAL_PLAN_IDS[selectedPlan]} 
+                                    onSubscribed={() => onSubscribed(selectedPlan)}
+                                    onError={handlePayPalError}
+                                />
+                            ) : (
+                                <div className="text-center p-4 text-red-500 font-semibold">
+                                    Failed to load payment options. The preview environment may have limitations. Please try again or test in a live environment.
+                                </div>
+                            )}
+                         </div>
+                         <button onClick={() => setSelectedPlan(null)} className="mt-4 text-gray-600 font-semibold text-sm">
+                            &larr; Choose a different plan
+                         </button>
+                    </div>
+                );
+            }
+
+            return (
+                <div className="flex flex-col items-center justify-start min-h-full text-center p-8 pt-12 text-shadow relative z-10">
+                    <h2 className="text-5xl font-bold mb-4 text-gray-800">Unlock Your Guide</h2>
+                    <p className="text-xl mb-6 max-w-md text-gray-700">Choose a plan to access all features, including the tracker, relief flows, and relaxation game.</p>
+                       <div className="text-left max-w-xs mx-auto my-4 space-y-2 text-base">
+                            <div className="flex items-center gap-2">
+                                 <span className="text-green-500 font-bold">✓</span>
+                                 <span className="text-gray-700">Instant Relief for hot flashes, anxiety & more.</span>
+                            </div>
+                            <div className="flex items-center gap-2">
+                                 <span className="text-green-500 font-bold">✓</span>
+                                 <span className="text-gray-700">Daily Symptom & Mood Tracker with charts.</span>
+                            </div>
+                             <div className="flex items-center gap-2">
+                                 <span className="text-green-500 font-bold">✓</span>
+                                 <span className="text-gray-700">Full access to the evidence-based Learn library.</span>
+                            </div>
+                             <div className="flex items-center gap-2">
+                                 <span className="text-green-500 font-bold">✓</span>
+                                 <span className="text-gray-700">Relaxing Bubble Game for mindfulness breaks.</span>
+                            </div>
+                       </div>
+                    <div className="space-y-4 w-full max-w-xs mt-6">
+                        <button onClick={() => handlePlanSelection('monthly')} className="w-full bg-pink-400 text-white font-bold py-4 px-6 rounded-lg shadow-md hover:bg-pink-500 transition-colors">
+                            Monthly Pro Plan
+                            <span className="block text-sm font-normal opacity-90">$9.99 / month</span>
+                        </button>
+                        <button onClick={() => handlePlanSelection('yearly')} className="w-full bg-green-400 text-white font-bold py-4 px-6 rounded-lg shadow-md hover:bg-green-500 transition-colors">
+                            Yearly Pro Plan (Save 35%)
+                            <span className="block text-sm font-normal opacity-90">$79.99 / year</span>
+                        </button>
+                        {!trialUsed && (
+                            <button onClick={() => handlePlanSelection('trial')} className="w-full bg-transparent border-2 border-green-400 text-green-500 font-bold py-4 px-6 rounded-lg shadow-md hover:bg-green-50 transition-colors">
+                                Start 3-Day Pro Free Trial
+                            </button>
+                        )}
+                    </div>
+                    <p className="text-sm text-gray-600 mt-8 italic max-w-xs">Think of it as a user manual for a body that's decided to rewrite its own code. Without telling you.</p>
+                </div>
+            );
+        };
+
+        const HomeScreen = ({ setPage, unlockAudio, deferredPrompt, setDeferredPrompt }) => {
+            const [isInstalled, setIsInstalled] = useState(false);
+
+            useEffect(() => {
+                // Check if the app is running in standalone mode (installed)
+                if (window.matchMedia('(display-mode: standalone)').matches) {
+                    setIsInstalled(true);
+                }
+            }, []);
+
+            const getGreeting = () => {
+                const currentHour = new Date().getHours();
+                if (currentHour < 12) return "Good Morning";
+                if (currentHour < 18) return "Good Afternoon";
+                return "Good Evening";
+            };
+
+            const handleReliefClick = () => {
+                unlockAudio();
+                setPage('relief-1');
+            };
+
+            const handleInstallClick = async () => {
+                if (!deferredPrompt) {
+                    // Maybe show a message that it can't be installed right now
+                    // or that the browser doesn't support it.
+                    console.log("Install prompt not available.");
+                    return;
+                }
+                deferredPrompt.prompt();
+                const { outcome } = await deferredPrompt.userChoice;
+                console.log(`User response to the install prompt: ${outcome}`);
+                setDeferredPrompt(null);
+            };
+
+            return (
+                <div className="relative flex flex-col items-center h-full text-center p-4 overflow-hidden justify-center">
+                    <div className="relative z-10 flex flex-col items-center justify-center w-full space-y-6">
+                        <div>
+                            <h1 className="text-5xl font-bold text-gray-800 text-shadow">{getGreeting()}</h1>
+                            <p className="text-xl font-light text-gray-600 mt-2 text-shadow">How are you feeling right now?</p>
+                        </div>
+
+                        <button onClick={handleReliefClick} className="relative group w-64 h-64 hover:scale-105 transition-transform duration-300">
+                           <GreenLavaButton />
+                        </button>
+                        
+                        <p className="text-base text-gray-600 max-w-xs text-shadow">Tap the bubble for immediate support.</p>
+
+                        {!isInstalled && (
+                            <button onClick={handleInstallClick} className="bg-white/80 backdrop-blur-sm text-green-600 font-bold py-3 px-6 rounded-full text-md shadow-lg hover:bg-white transition-colors">
+                                One-Tap Install / Add to Homescreen
+                            </button>
+                        )}
+                    </div>
+                </div>
+            );
+        };
+
+        const ReliefFlowPage1 = ({ setReliefState, unlockAudio }) => {
+            const handleSelection = (category) => {
+                unlockAudio();
+                setReliefState({ category });
+            }
+
+            return (
+                <div className="p-4 h-full flex flex-col justify-center">
+                    <div className="bg-white/80 backdrop-blur-md rounded-2xl p-6">
+                        <h2 className="text-2xl font-bold text-gray-800 mb-6 text-center">What are you struggling with?</h2>
+                        <div className="space-y-4">
+                            <button onClick={() => handleSelection('overheating')} className="w-full text-left p-4 bg-pink-100 text-pink-800 rounded-lg text-lg font-semibold shadow-sm hover:bg-pink-200 transition-colors">My Body is Overheating</button>
+                            <button onClick={() => handleSelection('anxiety')} className="w-full text-left p-4 bg-green-100 text-green-800 rounded-lg text-lg font-semibold shadow-sm hover:bg-green-200 transition-colors">I Can't Calm Down</button>
+                            <button onClick={() => handleSelection('sleep')} className="w-full text-left p-4 bg-pink-100 text-pink-800 rounded-lg text-lg font-semibold shadow-sm hover:bg-pink-200 transition-colors">My Sleep is Suffering</button>
+                            <button onClick={() => handleSelection('energy')} className="w-full text-left p-4 bg-green-100 text-green-800 rounded-lg text-lg font-semibold shadow-sm hover:bg-green-200 transition-colors">I Have Low Energy/Focus</button>
+                            <button onClick={() => handleSelection('mood')} className="w-full text-left p-4 bg-pink-100 text-pink-800 rounded-lg text-lg font-semibold shadow-sm hover:bg-pink-200 transition-colors">My Mood is Very Low</button>
+                        </div>
+                    </div>
+                </div>
+            );
+        };
+
+        const ReliefFlowPage2 = ({ reliefState, setReliefState }) => {
+            const data = reliefFlowData[reliefState.category];
+            if (!data) return <p>Error: Invalid category.</p>;
+
+            return (
+                <div className="p-4 h-full flex flex-col justify-center">
+                    <div className="bg-white/80 backdrop-blur-md rounded-2xl p-6">
+                        <h2 className="text-2xl font-bold text-gray-800 mb-6 text-center">{data.prompt}</h2>
+                        <div className="space-y-4">
+                            {Object.entries(data.options).map(([key, value]) => (
+                                <button key={key} onClick={() => setReliefState({ ...reliefState, subCategory: key })} className="w-full text-left p-4 bg-gray-100 text-gray-800 rounded-lg text-lg font-semibold shadow-sm hover:bg-gray-200 transition-colors">
+                                    {value.label}
+                                </button>
+                            ))}
+                        </div>
+                    </div>
+                </div>
+            );
+        };
+
+        const ReliefFlowStepScreen = ({ reliefState, setPage, resetReliefFlow, isAudioUnlocked }) => {
+            const [currentStep, setCurrentStep] = useState(0);
+            const [isSpeaking, setIsSpeaking] = useState(false);
+            const [voices, setVoices] = useState([]);
+
+            const data = useMemo(() =>
+                reliefState ? reliefFlowData[reliefState.category]?.options[reliefState.subCategory] : null,
+                [reliefState]
+            );
+
+            useEffect(() => {
+                const loadVoices = () => setVoices(window.speechSynthesis.getVoices());
+                loadVoices();
+                window.speechSynthesis.onvoiceschanged = loadVoices;
+
+                return () => {
+                    window.speechSynthesis.onvoiceschanged = null;
+                    window.speechSynthesis.cancel();
+                };
+            }, []);
+
+            const { displayTitle, displayContent } = useMemo(() => {
+                if (!data) return { displayTitle: '', displayContent: '' };
+                const rawStep = data.steps[currentStep];
+                if (rawStep.content.includes(':')) {
+                    const parts = rawStep.content.split(':');
+                    return { displayTitle: parts[0].trim(), displayContent: parts.slice(1).join(':').trim() };
+                }
+                return { displayTitle: rawStep.title, displayContent: rawStep.content };
+            }, [data, currentStep]);
+
+            const playSpeech = useCallback(() => {
+                if (!displayContent || voices.length === 0) return;
+
+                window.speechSynthesis.cancel();
+
+                const textToSpeak = `${displayTitle}. ${displayContent}`;
+                const utterance = new SpeechSynthesisUtterance(textToSpeak);
+
+                let selectedVoice = null;
+                const usVoices = voices.filter(v => v.lang === 'en-US');
+
+                if (usVoices.length > 0) {
+                    const preferredNames = ['Samantha', 'Google US English', 'Microsoft Zira', 'Tessa'];
+                    for (const name of preferredNames) {
+                        const found = usVoices.find(v => v.name.includes(name));
+                        if (found) { selectedVoice = found; break; }
+                    }
+                    if (!selectedVoice) { selectedVoice = usVoices.find(v => /female/i.test(v.name)); }
+                    if (!selectedVoice) { selectedVoice = usVoices.find(v => !/male/i.test(v.name)); }
+                    if (!selectedVoice) { selectedVoice = usVoices[0]; }
+                }
+
+                utterance.voice = selectedVoice;
+                utterance.pitch = 1;
+                utterance.rate = 0.9;
+
+                utterance.onstart = () => setIsSpeaking(true);
+                utterance.onend = () => setIsSpeaking(false);
+                utterance.onerror = (e) => { console.error("SpeechSynthesis Error", e); setIsSpeaking(false); };
+
+                window.speechSynthesis.speak(utterance);
+            }, [displayTitle, displayContent, voices]);
+
+            useEffect(() => {
+                if (isAudioUnlocked && voices.length > 0) {
+                    const timer = setTimeout(playSpeech, 250);
+                    return () => clearTimeout(timer);
+                }
+            }, [currentStep, voices, playSpeech, isAudioUnlocked]);
+
+            useEffect(() => {
+                setCurrentStep(0);
+                window.speechSynthesis.cancel();
+                setIsSpeaking(false);
+            }, [reliefState]);
+
+            const toggleSpeech = () => {
+                if (isSpeaking) {
+                    window.speechSynthesis.cancel();
+                    setIsSpeaking(false);
+                } else {
+                    playSpeech();
+                }
+            };
+
+            const handleNext = () => {
+                window.speechSynthesis.cancel();
+                setIsSpeaking(false);
+                if (data && currentStep < data.steps.length - 1) {
+                    setCurrentStep(currentStep + 1);
+                }
+            };
+
+            if (!data) return <div className="p-6 text-center">Loading...</div>;
+
+            const rawStep = data.steps[currentStep];
+            const isSafetyStep = rawStep.title === 'Safety & Doctor Note';
+            const isLastStep = currentStep === data.steps.length - 1;
+
+            return (
+                <div className="relative flex flex-col flex-grow p-4 justify-between">
+                    <div className="relative z-10 flex flex-col flex-grow bg-white/60 backdrop-blur-sm rounded-2xl p-4">
+                        <div className="w-full bg-gray-200 rounded-full h-2.5 mb-8">
+                            <div className="bg-green-400 h-2.5 rounded-full transition-all duration-500" style={{ width: `${((currentStep + 1) / data.steps.length) * 100}%` }}></div>
+                        </div>
+
+                        <div className="flex-grow flex flex-col justify-center">
+                            <div className="w-full h-40 mx-auto mb-4 flex items-center justify-center p-4">
+                               <LavaLampBubble />
+                            </div>
+                            
+                            <div className="flex items-center justify-center gap-3 mb-4">
+                                <h2 className="text-3xl font-bold text-gray-800 text-center">{displayTitle}</h2>
+                                <button onClick={toggleSpeech} className={`p-2 rounded-full transition-colors ${isSpeaking ? 'bg-pink-400 text-white' : 'bg-gray-200 text-gray-600 hover:bg-gray-300'}`}>
+                                    <SpeakerIcon className="w-6 h-6" />
+                                </button>
+                            </div>
+
+                            <div className={isSafetyStep ? 'p-4 bg-red-50 border-l-4 border-red-400 rounded-r-lg text-left' : 'text-center'}>
+                                <p className={`leading-relaxed ${isSafetyStep ? 'text-red-800 text-lg' : 'text-gray-700 text-xl'}`}>
+                                   {displayContent}
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div className="relative z-10 w-full mt-6 space-y-4">
+                        {isLastStep ? (
+                            <>
+                                <button onClick={() => setPage('game')} className="w-full bg-pink-400 text-white font-bold py-5 px-6 rounded-xl shadow-lg hover:bg-pink-500 transition-all duration-300 transform hover:scale-105 text-xl text-center">
+                                    Pop Some Bubbles
+                                </button>
+                                <button onClick={resetReliefFlow} className="w-full bg-gray-200 text-gray-800 font-bold py-4 px-6 rounded-xl hover:bg-gray-300 transition-colors text-lg text-center">
+                                    Finish
+                                </button>
+                            </>
+                        ) : (
+                            <button onClick={handleNext} className="w-full bg-green-500 text-white font-bold py-5 px-6 rounded-xl shadow-lg hover:bg-green-600 transition-all duration-300 transform hover:scale-105 text-xl text-center">
+                                Next Step
+                            </button>
+                        )}
+                    </div>
+                </div>
+            );
+        };
+        
+        const TrackerScreen = ({ user }) => {
+            const [trackerData, setTrackerData] = useState({});
+            const [view, setView] = useState('log');
+            const today = new Date().toISOString().split('T')[0];
+            const defaultLog = { mood: 3, hotFlashes: 1, sleep: 3, energy: 3, water: 0, notes: '' };
+
+            const [log, setLog] = useState(defaultLog);
+            const [isSubmittedToday, setIsSubmittedToday] = useState(false);
+            const [showSuccess, setShowSuccess] = useState(false);
+            
+            const [visualizeTab, setVisualizeTab] = useState('Charts');
+            const [daysToShow, setDaysToShow] = useState(7);
+
+            useEffect(() => {
+                if (user) {
+                    const docRef = window.firebase.doc(window.firebase.db, 'users', user.uid);
+                    const unsub = window.firebase.onSnapshot(docRef, (doc) => {
+                        if (doc.exists()) {
+                            const data = doc.data().trackerData || {};
+                            setTrackerData(data);
+                            setLog(data[today] || defaultLog);
+                            setIsSubmittedToday(!!data[today]);
+                        }
+                    });
+                    return () => unsub();
+                }
+            }, [user]);
+
+            const handleLogChange = (key, value) => {
+                setLog(prevLog => ({ ...prevLog, [key]: value }));
+            };
+
+            const handleSubmit = async () => {
+                if (user) {
+                    const docRef = window.firebase.doc(window.firebase.db, 'users', user.uid);
+                    const newTrackerData = { ...trackerData, [today]: log };
+                    await window.firebase.setDoc(docRef, { trackerData: newTrackerData }, { merge: true });
+                    
+                    setIsSubmittedToday(true);
+                    setShowSuccess(true);
+                    setTimeout(() => setShowSuccess(false), 2000);
+                }
+            };
+
+            const EmojiRating = ({ label, value, onChange, emojis }) => (
+                <div className="py-1">
+                    <label className="block font-semibold text-gray-600 mb-1 text-center text-sm">{label}</label>
+                    <div className="flex justify-around items-center bg-white/60 p-1 rounded-full">
+                        {emojis.map((emoji, index) => (
+                            <button
+                                key={index}
+                                onClick={() => onChange(index + 1)}
+                                className={`text-2xl transition-all duration-200 rounded-full w-10 h-10 flex items-center justify-center ${value === index + 1 ? 'bg-green-200 scale-125' : 'scale-90 opacity-50 hover:opacity-100'}`}
+                            >
+                                {emoji}
+                            </button>
+                        ))}
+                    </div>
+                </div>
+            );
+
+            const getChartData = (days) => {
+                const data = [];
+                for (let i = 0; i < days; i++) {
+                    const d = new Date();
+                    d.setDate(d.getDate() - (days - 1 - i));
+                    const dateStr = d.toISOString().split('T')[0];
+                    data.push({
+                        date: dateStr,
+                        ...defaultLog,
+                        ...(trackerData[dateStr] || {})
+                    });
+                }
+                return data;
+            };
+
+            const chartData = getChartData(daysToShow);
+            
+            const notesData = Object.entries(trackerData)
+              .filter(([, data]) => data.notes && data.notes.trim() !== '')
+              .sort(([dateA], [dateB]) => new Date(dateB) - new Date(dateA));
+
+
+            const LineChart = ({ data, metric, label, color, max = 5 }) => {
+                if (!data || data.length === 0) return null;
+                const width = 300;
+                const height = 150;
+                const padding = 20;
+
+                const points = data.map((d, i) => {
+                    const x = (i / (data.length - 1)) * (width - padding * 2) + padding;
+                    const y = height - padding - ((d[metric] / max) * (height - padding * 2));
+                    return `${x},${y}`;
+                }).join(' ');
+                
+                const lastPoint = data[data.length - 1];
+
+                return (
+                    <div className="bg-white/80 backdrop-blur-md p-4 rounded-2xl shadow-lg">
+                        <div className="flex justify-between items-center mb-2">
+                            <h3 className="font-bold text-gray-800">{label}</h3>
+                            <span className="text-2xl font-bold" style={{ color }}>{lastPoint[metric]}</span>
+                        </div>
+                        <svg viewBox={`0 0 ${width} ${height}`} className="w-full h-auto">
+                            {[...Array(max + 1)].map((_, i) => {
+                                if (i === 0) return null;
+                                const y = height - padding - ((i / max) * (height - padding * 2));
+                                return <line key={i} x1={padding} y1={y} x2={width - padding} y2={y} stroke="#e5e7eb" strokeWidth="0.5" />
+                            })}
+                            <polyline fill="none" stroke={color} strokeWidth="2.5" points={points} />
+                            {data.map((d, i) => {
+                                const x = (i / (data.length - 1)) * (width - padding * 2) + padding;
+                                const y = height - padding - ((d[metric] / max) * (height - padding * 2));
+                                return <circle key={i} cx={x} cy={y} r="3" fill={color} />
+                            })}
+                            <line x1={padding} y1={height - padding} x2={width-padding} y2={height-padding} stroke="#d1d5db" />
+                            <text x={padding} y={height - 5} fill="#9ca3af" fontSize="10">{new Date(data[0].date).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}</text>
+                            <text x={width - padding} y={height - 5} fill="#9ca3af" textAnchor="end" fontSize="10">{new Date(data[data.length - 1].date).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}</text>
+                        </svg>
+                    </div>
+                );
+            };
+
+            return (
+                <div className="p-4 flex flex-col">
+                    <div className="flex justify-center mb-4 flex-shrink-0">
+                        <button onClick={() => setView('log')} className={`px-4 py-2 rounded-l-lg font-semibold ${view === 'log' ? 'bg-green-400 text-white' : 'bg-white/70'}`}>Daily Log</button>
+                        <button onClick={() => setView('chart')} className={`px-4 py-2 rounded-r-lg font-semibold ${view === 'chart' ? 'bg-green-400 text-white' : 'bg-white/70'}`}>Visualize</button>
+                    </div>
+
+                    {view === 'log' ? (
+                         <div className="flex-grow flex flex-col justify-between bg-white/80 backdrop-blur-md p-4 rounded-2xl shadow-inner">
+                             <div className="space-y-3">
+                                 <h2 className="text-xl font-bold text-center text-gray-700">Today's Log</h2>
+                                 <p className="text-center text-gray-500 text-sm -mt-2 mb-2">{new Date(today).toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric' })}</p>
+                                 
+                                 <div className="space-y-2">
+                                     <EmojiRating label="Mood" value={log.mood} onChange={(v) => handleLogChange('mood', v)} emojis={['😞', '😐', '😊', '😁', '🤩']} />
+                                     <EmojiRating label="Sleep Quality" value={log.sleep} onChange={(v) => handleLogChange('sleep', v)} emojis={['😴', '😫', '😐', '😌', '😇']} />
+                                     <EmojiRating label="Energy Level" value={log.energy} onChange={(v) => handleLogChange('energy', v)} emojis={['🪫', '🥱', '😐', '⚡️', '🚀']} />
+                                     <EmojiRating label="Hot Flashes" value={log.hotFlashes} onChange={(v) => handleLogChange('hotFlashes', v)} emojis={['🧊', '🙂', '🥵', '🔥', '🌋']} />
+                                 </div>
+
+                                 <div className="py-1">
+                                     <label className="block font-semibold text-gray-700 mb-1 text-center text-sm">Water Intake</label>
+                                     <div className="flex items-center justify-center space-x-4">
+                                         <button onClick={() => handleLogChange('water', Math.max(0, log.water - 1))} className="bg-gray-200 rounded-full w-10 h-10 text-2xl font-bold transition-transform hover:scale-110">-</button>
+                                         <div className="text-center">
+                                             <span className="text-3xl font-bold text-gray-800">{log.water}</span>
+                                             <p className="text-xs text-gray-500 -mt-1">glasses</p>
+                                         </div>
+                                         <button onClick={() => handleLogChange('water', log.water + 1)} className="bg-green-300 text-white rounded-full w-10 h-10 text-2xl font-bold transition-transform hover:scale-110">+</button>
+                                     </div>
+                                 </div>
+                                 
+                                 <div>
+                                     <label className="block font-semibold text-gray-700 mb-1 text-sm">Daily Notes (250 char max)</label>
+                                     <textarea
+                                         value={log.notes}
+                                         onChange={(e) => handleLogChange('notes', e.target.value)}
+                                         maxLength="250"
+                                         className="w-full h-16 p-2 border-none bg-white/60 rounded-xl shadow-inner focus:outline-none focus:ring-2 focus:ring-green-300 text-sm"
+                                         placeholder="Any details to remember?"
+                                     />
+                                 </div>
+                             </div>
+                             <button onClick={handleSubmit} className={`w-full font-bold py-3 px-6 rounded-xl shadow-lg transition-all duration-300 text-base text-center mt-2 ${isSubmittedToday ? 'bg-pink-400 hover:bg-pink-500 text-white' : 'bg-green-500 hover:bg-green-600 text-white'}`}>
+                                 {showSuccess ? 'Saved!' : (isSubmittedToday ? 'Update Todays Log' : 'Submit Today\'s Log')}
+                             </button>
+                         </div>
+                    ) : (
+                        <div className="flex-grow flex flex-col min-h-0">
+                             <div className="flex justify-center mb-4 bg-white/70 backdrop-blur-sm p-1 rounded-full w-min mx-auto flex-shrink-0">
+                                 <button onClick={() => setVisualizeTab('Charts')} className={`px-4 py-1.5 rounded-full font-semibold text-sm ${visualizeTab === 'Charts' ? 'bg-green-400 text-white' : ''}`}>Charts</button>
+                                 <button onClick={() => setVisualizeTab('Notes')} className={`px-4 py-1.5 rounded-full font-semibold text-sm ${visualizeTab === 'Notes' ? 'bg-green-400 text-white' : ''}`}>Notes</button>
+                             </div>
+                             <div className="flex-grow">
+                             {visualizeTab === 'Charts' ? (
+                                 <div className="space-y-4">
+                                    <div className="flex justify-center mb-4 bg-white/70 backdrop-blur-sm p-1 rounded-full w-min mx-auto">
+                                        <button onClick={() => setDaysToShow(7)} className={`px-4 py-1.5 rounded-full font-semibold text-sm ${daysToShow === 7 ? 'bg-green-400 text-white' : ''}`}>7 Days</button>
+                                        <button onClick={() => setDaysToShow(30)} className={`px-4 py-1.5 rounded-full font-semibold text-sm ${daysToShow === 30 ? 'bg-green-400 text-white' : ''}`}>30 Days</button>
+                                    </div>
+                                     <LineChart data={chartData} metric="mood" label="Mood Trend" color="#ec4899" />
+                                     <LineChart data={chartData} metric="sleep" label="Sleep Trend" color="#3b82f6" />
+                                     <LineChart data={chartData} metric="energy" label="Energy Trend" color="#f59e0b" />
+                                     <LineChart data={chartData} metric="hotFlashes" label="Hot Flash Trend" color="#ef4444" />
+                                 </div>
+                             ) : (
+                                 <div className="space-y-3">
+                                     {notesData.length > 0 ? notesData.map(([date, data]) => (
+                                         <div key={date} className="bg-white/80 backdrop-blur-sm p-3 rounded-lg shadow">
+                                             <p className="font-bold text-sm text-gray-600">{new Date(date + 'T00:00:00').toLocaleDateString('en-US', { weekday: 'long', month: 'short', day: 'numeric' })}</p>
+                                             <p className="text-gray-800 text-sm break-words whitespace-pre-wrap">{data.notes}</p>
+                                         </div>
+                                     )) : (
+                                         <p className="text-center text-gray-500 mt-8">No notes saved yet.</p>
+                                     )}
+                                 </div>
+                             )}
+                             </div>
+                        </div>
+                    )}
+                </div>
+            );
+        };
+        
+        const LearnScreen = ({ setPage }) => {
+            const [selectedArticle, setSelectedArticle] = useState(null);
+            const [searchTerm, setSearchTerm] = useState('');
+            const [selectedCategory, setSelectedCategory] = useState('All');
+
+            const categories = ['All', ...new Set(learnContent.map(item => item.category))];
+
+            const filteredArticles = learnContent.filter(article => {
+                const title = article.title;
+                const matchesCategory = selectedCategory === 'All' || article.category === selectedCategory;
+                const matchesSearch = title.toLowerCase().includes(searchTerm.toLowerCase());
+                return matchesCategory && matchesSearch;
+            });
+
+            if (selectedArticle) {
+            return (
+                    <div className="p-4 flex flex-col">
+                         <div className="flex-grow p-2">
+                            <div className="p-6 bg-white/80 backdrop-blur-md rounded-lg shadow-lg">
+                                <button onClick={() => setSelectedArticle(null)} className="font-bold text-green-500 mb-4">&larr; Back to articles</button>
+                                <h2 className="text-2xl font-bold mb-4 text-gray-800">{selectedArticle.title}</h2>
+                                    <p className="text-gray-700 leading-relaxed whitespace-pre-line">{selectedArticle.content}</p>
+                                </div>
+                            </div>
+                        </div>
+                    )
+            }
+
+            return (
+                <div className="p-4 flex flex-col">
+                    <div className="mb-4">
+                        <input
+                            type="text"
+                            placeholder="Search articles..."
+                            value={searchTerm}
+                            onChange={(e) => setSearchTerm(e.target.value)}
+                            className="w-full p-3 rounded-lg border-2 border-gray-200 focus:outline-none focus:ring-2 focus:ring-green-400"
+                        />
+                    </div>
+                    <div className="flex flex-wrap gap-2 mb-4">
+                        {categories.map(category => (
+                            <button
+                                key={category}
+                                onClick={() => setSelectedCategory(category)}
+                                className={`flex-shrink-0 px-3 py-1 text-sm rounded-full font-semibold transition-colors ${selectedCategory === category ? 'bg-green-500 text-white' : 'bg-gray-200 text-gray-700 hover:bg-gray-300'}`}
+                            >
+                                {category}
+                            </button>
+                        ))}
+                    </div>
+                   <div className="flex-grow">
+                        <div className="space-y-3">
+                            {filteredArticles.length > 0 ? filteredArticles.map(article => (
+                                     <div key={article.id} onClick={() => setSelectedArticle(article)} className="p-4 bg-white/80 backdrop-blur-sm rounded-lg shadow-sm cursor-pointer hover:shadow-md transition-shadow">
+                                         <h3 className="font-bold text-lg text-gray-800">{article.title}</h3>
+                                             <span className="text-xs text-green-700 font-semibold">{article.category}</span>
+                                         </div>
+                                     )) : (
+                                         <p className="text-center text-gray-500 mt-8">No articles found.</p>
+                                     )}
+                             </div>
+                        </div>
+                </div>
+            );
+        };
+        
+        const GameScreen = ({ setPage }) => {
+            const canvasRef = useRef(null);
+            const bubblesRef = useRef([]);
+            const audioContextRef = useRef(null);
+            const slicePointsRef = useRef([]);
+            const isSlicingRef = useRef(false);
+
+            const createPopSound = useCallback(() => {
+                if (!audioContextRef.current) {
+                    try {
+                        audioContextRef.current = new (window.AudioContext || window.webkitAudioContext)();
+                    } catch(e) { console.error("Web Audio API is not supported."); return; }
+                }
+                const context = audioContextRef.current;
+                if (context.state === 'suspended') { context.resume(); }
+                
+                const now = context.currentTime;
+                const oscillator = context.createOscillator();
+                const gainNode = context.createGain();
+                oscillator.connect(gainNode);
+                gainNode.connect(context.destination);
+                
+                gainNode.gain.setValueAtTime(0.2, now);
+                gainNode.gain.exponentialRampToValueAtTime(0.001, now + 0.1);
+                
+                oscillator.type = 'sine';
+                oscillator.frequency.setValueAtTime(800, now);
+                oscillator.frequency.exponentialRampToValueAtTime(200, now + 0.1);
+
+                oscillator.start(now);
+                oscillator.stop(now + 0.1);
+            },[]);
+
+            useEffect(() => {
+                const canvas = canvasRef.current;
+                const ctx = canvas.getContext('2d');
+                let animationFrameId;
+                let hasMoved = false;
+
+                const resizeCanvas = () => {
+                    canvas.width = canvas.parentElement.clientWidth;
+                    canvas.height = canvas.parentElement.clientHeight;
+                };
+
+                const createBubble = () => {
+                    if (bubblesRef.current.length > 30) return;
+                    const radius = Math.random() * 30 + 15;
+                    const x = Math.random() * (canvas.width - radius * 2) + radius;
+                    const y = canvas.height + radius;
+                    const speed = Math.random() * 2 + 0.5;
+                    const color = `hsla(${Math.random() * 360}, 80%, 60%, 0.8)`;
+                    bubblesRef.current.push({ x, y, radius, speed, color, popped: false });
+                };
+                
+                const drawSliceTrail = () => {
+                    if (slicePointsRef.current.length < 2) return;
+                    ctx.strokeStyle = 'rgba(255, 255, 255, 0.7)';
+                    ctx.lineWidth = 5;
+                    ctx.lineCap = 'round';
+                    ctx.lineJoin = 'round';
+                    ctx.beginPath();
+                    ctx.moveTo(slicePointsRef.current[0].x, slicePointsRef.current[0].y);
+                    for (let i = 1; i < slicePointsRef.current.length; i++) {
+                        ctx.lineTo(slicePointsRef.current[i].x, slicePointsRef.current[i].y);
+                    }
+                    ctx.stroke();
+                };
+
+                const animate = () => {
+                    ctx.clearRect(0, 0, canvas.width, canvas.height);
+                    
+                    bubblesRef.current = bubblesRef.current.filter(bubble => !bubble.popped && bubble.y > -bubble.radius);
+
+                    bubblesRef.current.forEach(bubble => {
+                        bubble.y -= bubble.speed;
+                        
+                        ctx.beginPath();
+                        ctx.arc(bubble.x, bubble.y, bubble.radius, 0, Math.PI * 2);
+                        ctx.fillStyle = bubble.color;
+                        ctx.fill();
+                        
+                        ctx.beginPath();
+                        ctx.arc(bubble.x - bubble.radius * 0.3, bubble.y - bubble.radius * 0.3, bubble.radius * 0.3, 0, Math.PI * 2);
+                        ctx.fillStyle = 'rgba(255, 255, 255, 0.5)';
+                        ctx.fill();
+                    });
+
+                    drawSliceTrail();
+                    if (slicePointsRef.current.length > 0 && !isSlicingRef.current) {
+                        slicePointsRef.current.splice(0, Math.max(1, Math.floor(slicePointsRef.current.length / 4)));
+                    }
+
+
+                    animationFrameId = requestAnimationFrame(animate);
+                };
+                
+                const getCoords = (e) => {
+                    const rect = canvas.getBoundingClientRect();
+                    let clientX, clientY;
+                    if (e.touches && e.touches.length > 0) {
+                        clientX = e.touches[0].clientX;
+                        clientY = e.touches[0].clientY;
+                    } else if (e.changedTouches && e.changedTouches.length > 0) {
+                        clientX = e.changedTouches[0].clientX;
+                        clientY = e.changedTouches[0].clientY;
+                    } else {
+                        clientX = e.clientX;
+                        clientY = e.clientY;
+                    }
+                    return { x: clientX - rect.left, y: clientY - rect.top };
+                };
+
+                const lineCircleIntersection = (x1, y1, x2, y2, cx, cy, r) => {
+                    let dx = x2 - x1;
+                    let dy = y2 - y1;
+                    let a = dx*dx + dy*dy;
+                    let b = 2 * (dx * (x1-cx) + dy * (y1-cy));
+                    let c = (x1-cx)*(x1-cx) + (y1-cy)*(y1-cy) - r*r;
+                    let det = b*b - 4*a*c;
+                    if (det < 0) return false;
+                    
+                    det = Math.sqrt(det);
+                    let t1 = (-b - det) / (2*a);
+                    let t2 = (-b + det) / (2*a);
+                    
+                    return (t1 >= 0 && t1 <= 1) || (t2 >= 0 && t2 <= 1);
+                };
+
+                const handleInteractionStart = (e) => {
+                    isSlicingRef.current = true;
+                    hasMoved = false;
+                    slicePointsRef.current = [getCoords(e)];
+                };
+                
+                const handleInteractionEnd = (e) => {
+                    if (!hasMoved) { // This was a tap
+                        const { x, y } = getCoords(e);
+                        for (let i = bubblesRef.current.length - 1; i >= 0; i--) {
+                            const bubble = bubblesRef.current[i];
+                            if (bubble.popped) continue;
+                            const distance = Math.sqrt((x - bubble.x) ** 2 + (y - bubble.y) ** 2);
+                            if (distance < bubble.radius) {
+                                bubble.popped = true;
+                                createPopSound();
+                                break; 
+                            }
+                        }
+                    }
+                    isSlicingRef.current = false;
+                };
+
+                const handleInteractionMove = (e) => {
+                    if (!isSlicingRef.current) return;
+                    e.preventDefault();
+                    hasMoved = true;
+                    const { x, y } = getCoords(e);
+                    
+                    slicePointsRef.current.push({ x, y });
+                    if (slicePointsRef.current.length > 15) slicePointsRef.current.shift();
+
+                    if (slicePointsRef.current.length > 1) {
+                        const lastPoint = slicePointsRef.current[slicePointsRef.current.length - 2];
+                        const currentPoint = slicePointsRef.current[slicePointsRef.current.length - 1];
+                        bubblesRef.current.forEach(bubble => {
+                            if (!bubble.popped && lineCircleIntersection(lastPoint.x, lastPoint.y, currentPoint.x, currentPoint.y, bubble.x, bubble.y, bubble.radius)) {
+                                bubble.popped = true;
+                                createPopSound();
+                            }
+                        });
+                    }
+                };
+
+                resizeCanvas();
+                window.addEventListener('resize', resizeCanvas);
+                
+                canvas.addEventListener('mousedown', handleInteractionStart);
+                canvas.addEventListener('mousemove', handleInteractionMove);
+                window.addEventListener('mouseup', handleInteractionEnd);
+                
+                canvas.addEventListener('touchstart', handleInteractionStart, { passive: false });
+                canvas.addEventListener('touchmove', handleInteractionMove, { passive: false });
+                window.addEventListener('touchend', handleInteractionEnd);
+
+                const bubbleInterval = setInterval(createBubble, 500);
+                animate();
+
+                return () => {
+                    window.removeEventListener('resize', resizeCanvas);
+                    canvas.removeEventListener('mousedown', handleInteractionStart);
+                    canvas.removeEventListener('mousemove', handleInteractionMove);
+                    window.removeEventListener('mouseup', handleInteractionEnd);
+                    canvas.removeEventListener('touchstart', handleInteractionStart);
+                    canvas.removeEventListener('touchmove', handleInteractionMove);
+                    window.removeEventListener('touchend', handleInteractionEnd);
+                    clearInterval(bubbleInterval);
+                    cancelAnimationFrame(animationFrameId);
+                    if (audioContextRef.current) { audioContextRef.current.close(); }
+                };
+            }, [createPopSound]);
+
+            return (
+                <div className="w-full h-full bg-gradient-to-b from-green-100 to-pink-100 relative">
+                    <div className="absolute top-0 left-0 right-0 p-4 flex items-center justify-between z-20">
+                        <div className="w-20"></div> {/* Spacer */}
+                        <div className="flex items-center space-x-2 text-green-700">
+                            <LogoBubble />
+                            <span className="font-bold text-lg text-gray-800 text-shadow">Meno-Guide</span>
+                        </div>
+                        <div className="w-20 flex justify-end">
+                            <button onClick={() => setPage('settings')} className="text-gray-700 w-10 h-10 flex items-center justify-center rounded-full bg-white/40 hover:bg-white/60 backdrop-blur-sm shadow-md transition-colors">
+                                <SettingsIcon className="w-6 h-6"/>
+                            </button>
+                        </div>
+                    </div>
+                    <canvas ref={canvasRef} className="w-full h-full cursor-crosshair"></canvas>
+                    <p className="absolute bottom-4 left-1/2 -translate-x-1/2 text-gray-500/80 text-sm font-semibold text-shadow">Tap or Slice to Pop!</p>
+                </div>
+            );
+        };
+        const SettingsScreen = ({ setPage, subscription }) => {
+            const handleLogout = () => {
+                window.firebase.signOut(window.firebase.auth).catch(error => console.error("Logout failed:", error));
+                 window.location.reload();
+            };
+            
+            return (
+                <div className="p-4 h-full flex flex-col justify-center">
+                    <div className="bg-white/80 backdrop-blur-md rounded-2xl p-6">
+                        <h2 className="text-2xl font-bold mb-6 text-gray-800">Settings</h2>
+                        <div className="space-y-4">
+                            <div className="p-4 bg-white rounded-lg shadow-sm">
+                                <h3 className="font-semibold text-gray-700">Account</h3>
+                                <p className="text-gray-500 truncate">{window.firebase.auth.currentUser?.email || 'testing@meno-guide.app'}</p>
+                            </div>
+
+                            <div className="p-4 bg-white rounded-lg shadow-sm">
+                                <h3 className="font-semibold text-gray-700">Subscription</h3>
+                                <p className={`font-bold ${subscription.status === 'active' ? 'text-green-600' : 'text-red-500'}`}>
+                                    {subscription.plan || 'No Plan'}
+                                </p>
+                                <p className="text-gray-500 text-sm">{subscription.validity}</p>
+                            </div>
+
+                            <div className="p-4 bg-white rounded-lg shadow-sm">
+                                <h3 className="font-semibold text-gray-700">App Info</h3>
+                                <p className="text-gray-500">Meno-Guide v1.0.0</p>
+                                <p className="text-gray-500 text-sm">Company: Daivaii</p>
+                                <p className="text-gray-500 text-sm">Created by: THE AK</p>
+                            </div>
+
+                            <button
+                                onClick={handleLogout}
+                                className="w-full bg-red-500 text-white font-bold py-3 rounded-lg shadow-md hover:bg-red-600 transition-colors"
+                            >
+                                Log Out
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            )
+        }
+
+        const NavigationBar = ({ page, setPage }) => (
+            <div className="flex justify-around items-center">
+                <button onClick={() => setPage('home')} className={`group relative flex flex-col items-center py-2 px-3 w-full transition-colors duration-200 ${page === 'home' ? 'text-green-500' : 'text-gray-400 hover:text-green-500'}`}>
+                    <NewHomeIcon className="w-7 h-7" />
+                    <span className="text-xs">Home</span>
+                </button>
+                <button onClick={() => setPage('tracker')} className={`group relative flex flex-col items-center py-2 px-3 w-full transition-colors duration-200 ${page === 'tracker' ? 'text-green-500' : 'text-gray-400 hover:text-green-500'}`}>
+                    <NewTrackerIcon className="w-7 h-7" />
+                    <span className="text-xs">Tracker</span>
+                </button>
+                <button onClick={() => setPage('learn')} className={`group relative flex flex-col items-center py-2 px-3 w-full transition-colors duration-200 ${page === 'learn' ? 'text-green-500' : 'text-gray-400 hover:text-green-500'}`}>
+                    <NewLearnIcon className="w-7 h-7" />
+                    <span className="text-xs">Learn</span>
+                </button>
+                <button onClick={() => setPage('game')} className={`group relative flex flex-col items-center py-2 px-3 w-full transition-colors duration-200 ${page === 'game' ? 'text-green-500' : 'text-gray-400 hover:text-green-500'}`}>
+                    <GamingControllerIcon className="w-7 h-7" />
+                    <span className="text-xs">Game</span>
+                </button>
+            </div>
+        );
+        
+        const LoginScreen = () => {
+            const handleGoogleSignIn = () => {
+                const { auth, provider, signInWithPopup } = window.firebase;
+                signInWithPopup(auth, provider)
+                    .catch((error) => {
+                        console.error("Google Sign-In Error", error);
+                    });
+            };
+
+            const StarRating = ({ rating }) => (
+                <div className="flex">
+                    {[...Array(5)].map((_, i) => (
+                        <svg key={i} className={`w-4 h-4 ${i < rating ? 'text-black' : 'text-gray-300'}`} fill="currentColor" viewBox="0 0 20 20">
+                            <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
+                        </svg>
+                    ))}
+                </div>
+            );
+
+            const testimonials = [
+                { name: "Sarah L.", rating: 5, text: "This app is a lifesaver! The relief flows are pure magic during a hot flash." },
+                { name: "Jane M.", rating: 5, text: "Finally, an app that gets it. I feel so much more in control of my symptoms." },
+                { name: "Maria G.", rating: 4, text: "The tracker has been eye-opening. I can see patterns I never noticed before." },
+                { name: "Linda H.", rating: 5, text: "I was skeptical, but the mindfulness exercises have genuinely reduced my anxiety." },
+                { name: "Karen B.", rating: 5, text: "The bubble pop game is my new go-to for stressful moments. So simple, but so effective!" },
+                { name: "Emily C.", rating: 4, text: "A fantastic resource. The articles are straightforward and easy to understand." },
+                { name: "Susan P.", rating: 5, text: "I feel less alone in this journey. It's like having a supportive friend in my pocket." },
+            ];
+            
+            const TestimonialCarousel = () => {
+                const [currentIndex, setCurrentIndex] = useState(0);
+
+                useEffect(() => {
+                    const timer = setInterval(() => {
+                        setCurrentIndex(prevIndex => (prevIndex + 1) % testimonials.length);
+                    }, 4000);
+                    return () => clearInterval(timer);
+                }, []);
+
+                return (
+                    <div className="w-full max-w-xs mx-auto overflow-hidden relative h-32">
+                        {testimonials.map((testimonial, index) => (
+                               <div key={index} className={`absolute w-full transition-opacity duration-500 ease-in-out ${index === currentIndex ? 'opacity-100' : 'opacity-0'}`}>
+                                 <div className="bg-white/70 backdrop-blur-sm p-4 rounded-xl shadow-md">
+                                     <div className="flex items-center justify-between mb-2">
+                                         <p className="font-bold text-gray-800">{testimonial.name}</p>
+                                         <StarRating rating={testimonial.rating} />
+                                     </div>
+                                     <p className="text-gray-600 text-sm text-left">"{testimonial.text}"</p>
+                                 </div>
+                            </div>
+                        ))}
+                    </div>
+                );
+            };
+
+
+            return (
+                <div className="flex flex-col min-h-full text-center p-4 text-shadow relative z-10">
+                    <div className="flex-grow flex flex-col items-center justify-start pt-8">
+                        <div className="w-40 h-40 mx-auto mb-6"><LavaLampBubble /></div>
+                        <h1 className="text-5xl font-bold text-gray-800">
+                            <span>Welcome to</span>
+                            <span className="block">Meno-Guide</span>
+                        </h1>
+                        <p className="text-xl my-4 max-w-md text-gray-700">Your personal guide to navigating menopause with calm and confidence.</p>
+                        
+                        <div className="text-left max-w-xs mx-auto my-3 space-y-1 text-base">
+                              <div className="flex items-center gap-2">
+                                <span className="text-green-500 font-bold">✓</span>
+                                <span className="text-gray-700 font-semibold">No to trash exercises.</span>
+                              </div>
+                              <div className="flex items-center gap-2">
+                                <span className="text-green-500 font-bold">✓</span>
+                                <span className="text-gray-700 font-semibold">Less chaos, more calm.</span>
+                              </div>
+                               <div className="flex items-center gap-2">
+                                <span className="text-green-500 font-bold">✓</span>
+                                <span className="text-gray-700 font-semibold">Guidance through the overwhelm.</span>
+                              </div>
+                               <div className="flex items-center gap-2">
+                                <span className="text-green-500 font-bold">✓</span>
+                                <span className="text-gray-700 font-semibold">Your personal pause button.</span>
+                              </div>
+                               <div className="flex items-center gap-2">
+                                <span className="text-green-500 font-bold">✓</span>
+                                <span className="text-gray-700 font-semibold">Relief in your pocket.</span>
+                              </div>
+                        </div>
+
+                        <button
+                            onClick={handleGoogleSignIn}
+                            className="mt-4 bg-white/80 backdrop-blur-sm text-gray-800 font-bold py-3 px-6 rounded-full text-lg shadow-lg hover:bg-white transition-colors flex items-center gap-3"
+                        >
+                            <GoogleIcon />
+                            Sign in with Google
+                        </button>
+                         <div className="text-center mt-4 text-sm text-gray-500 italic">
+                             <p>created with ❤️ For you...</p>
+                             <p>-THE AK</p>
+                         </div>
+                    </div>
+                    <div className="flex-shrink-0 w-full pb-4">
+                        <TestimonialCarousel />
+                    </div>
+                </div>
+            );
+        };
+
+        const LoadingScreen = () => (
+            <div className="flex flex-col items-center justify-center h-full text-center p-8 text-shadow relative z-10">
+                <div className="w-40 h-40 mx-auto mb-6">
+                    <LavaLampBubble />
+                </div>
+                <div className="text-center mt-4 text-sm text-gray-500 italic">
+                    <p>created with ❤️ For you...</p>
+                    <p>-THE AK</p>
+                </div>
+            </div>
+        );
+
+
+        // --- MAIN APP COMPONENT ---
+        function App() {
+            const [page, setPage] = useState('home');
+            const [reliefState, setReliefState] = useState(null);
+            const [isAudioUnlocked, setIsAudioUnlocked] = useState(false);
+            const [deferredPrompt, setDeferredPrompt] = useState(null);
+            
+            const [user, setUser] = useState(null);
+            const [subscription, setSubscription] = useState(null);
+            const [isAuthReady, setIsAuthReady] = useState(false);
+
+            useEffect(() => {
+                // PWA Install Prompt Handler
+                const handler = (e) => {
+                    e.preventDefault();
+                    setDeferredPrompt(e);
+                };
+                window.addEventListener('beforeinstallprompt', handler);
+
+                // Service Worker Registration
+                if ('serviceWorker' in navigator) {
+                    window.addEventListener('load', () => {
+                        navigator.serviceWorker.register('/sw.js')
+                            .then(registration => console.log('Service Worker registered:', registration))
+                            .catch(error => console.log('Service Worker registration failed:', error));
+                    });
+                }
+                
+                const unsubscribe = window.firebase.onAuthStateChanged(window.firebase.auth, async (user) => {
+                  if (user) {
+                    setUser(user);
+                    const docRef = window.firebase.doc(window.firebase.db, 'users', user.uid);
+                    const docSnap = await window.firebase.getDoc(docRef);
+                    if (docSnap.exists() && docSnap.data().subscription) {
+                        setSubscription(docSnap.data().subscription);
+                    } else {
+                        // New user or no subscription data, create their initial doc
+                        const newSub = { status: 'none', trialUsed: false, plan: 'None', validity: 'N/A' };
+                        setSubscription(newSub);
+                        await window.firebase.setDoc(docRef, { subscription: newSub }, { merge: true });
+                    }
+                  } else {
+                    setUser(null);
+                    setSubscription(null);
+                  }
+                  setIsAuthReady(true);
+                });
+
+                return () => {
+                    window.removeEventListener('beforeinstallprompt', handler);
+                    if(unsubscribe) unsubscribe(); 
+                };
+            }, []);
+            
+            const handleSubscriptionUpdate = async (planType) => {
+                let newValidity = new Date();
+                let newPlan = '';
+                
+                if (planType === 'monthly') {
+                    newValidity.setMonth(newValidity.getMonth() + 1);
+                    newPlan = 'Pro Plan (Monthly)';
+                } else if (planType === 'yearly') {
+                    newValidity.setFullYear(newValidity.getFullYear() + 1);
+                    newPlan = 'Pro Plan (Yearly)';
+                } else if (planType === 'trial') {
+                    newValidity.setDate(newValidity.getDate() + 3);
+                    newPlan = 'Pro Trial';
+                }
+
+                const updatedSubscription = {
+                    status: 'active',
+                    trialUsed: subscription.trialUsed || (planType === 'trial'),
+                    plan: newPlan,
+                    validity: `Expires on ${newValidity.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}`
+                };
+                
+                if (user) {
+                    await window.firebase.setDoc(window.firebase.doc(window.firebase.db, 'users', user.uid), { subscription: updatedSubscription }, { merge: true });
+                }
+                
+                setSubscription(updatedSubscription);
+            };
+
+            const unlockAudio = useCallback(() => {
+                if (isAudioUnlocked) return;
+                const utterance = new SpeechSynthesisUtterance(" ");
+                utterance.volume = 0;
+                window.speechSynthesis.speak(utterance);
+                setIsAudioUnlocked(true);
+            }, [isAudioUnlocked]);
+
+
+            useEffect(() => {
+                if (reliefState?.category && !reliefState.subCategory) {
+                    setPage('relief-2');
+                }
+                if (reliefState?.subCategory) {
+                    setPage('relief-steps');
+                }
+            }, [reliefState]);
+
+            const resetReliefFlow = () => {
+                setReliefState(null);
+                setPage('home');
+            }
+            
+            const handleBack = () => {
+                if(page === 'settings') {
+                    setPage('home');
+                } else if(page === 'relief-steps') {
+                    setReliefState({ category: reliefState.category });
+                    setPage('relief-2');
+                } else if(page === 'relief-2') {
+                    setReliefState(null);
+                    setPage('relief-1');
+                } else {
+                    setReliefState(null);
+                    setPage('home');
+                }
+            }
+
+            const renderPage = () => {
+                if (!isAuthReady) {
+                    return <LoadingScreen />;
+                }
+                if (!user) {
+                    return <LoginScreen />;
+                }
+                 if (!subscription) {
+                    return <LoadingScreen />;
+                }
+                // Subscription Gate: If subscription is not active, force to subscription page
+                if (subscription.status !== 'active') {
+                    return <SubscriptionGate onSubscribed={handleSubscriptionUpdate} trialUsed={subscription.trialUsed} />;
+                }
+
+
+                switch (page) {
+                    case 'home': return <HomeScreen setPage={setPage} unlockAudio={unlockAudio} deferredPrompt={deferredPrompt} setDeferredPrompt={setDeferredPrompt} />;
+                    case 'relief-1': return <ReliefFlowPage1 setReliefState={setReliefState} unlockAudio={unlockAudio} />;
+                    case 'relief-2': return <ReliefFlowPage2 reliefState={reliefState} setReliefState={setReliefState} />;
+                    case 'relief-steps': return <ReliefFlowStepScreen reliefState={reliefState} setPage={setPage} resetReliefFlow={resetReliefFlow} isAudioUnlocked={isAudioUnlocked} />;
+                    case 'tracker': return <TrackerScreen user={user} />;
+                    case 'learn': return <LearnScreen />;
+                    case 'game': return <GameScreen setPage={setPage} />;
+                    case 'settings': return <SettingsScreen setPage={setPage} subscription={subscription} />;
+                    default: return <HomeScreen setPage={setPage} unlockAudio={unlockAudio} />;
+                }
+            };
+            
+            const showNavBar = isAuthReady && user && subscription?.status === 'active' && !['relief-steps'].includes(page);
+            const showSettings = isAuthReady && user && subscription?.status === 'active' && !['settings', 'game', 'login'].includes(page);
+            const showBackButton = isAuthReady && user && subscription?.status === 'active' && (page.startsWith('relief') || page === 'settings');
+            const showHeader = isAuthReady && user && subscription?.status === 'active' && !['game', 'login'].includes(page);
+
+            // If subscription is not active, we don't want to show navbars or headers, just the subscription page.
+             if (!isAuthReady || !user || !subscription || subscription.status !== 'active') {
+                 return (
+                       <div className="font-sans h-full w-full max-w-lg mx-auto shadow-2xl relative flex flex-col">
+                           <WaterBackground />
+                           <main className="flex-grow relative z-10 flex flex-col min-h-0 overflow-y-auto custom-scrollbar">
+                                <div className="relative flex-1 flex flex-col min-h-0">{renderPage()}</div>
+                           </main>
+                       </div>
+                 );
+             }
+
+            return (
+                <div className="font-sans h-full w-full max-w-lg mx-auto shadow-2xl relative flex flex-col">
+                    <main className="flex-grow relative z-10 flex flex-col min-h-0">
+                        <div className="absolute inset-0">
+                            {!page.includes('game') && <WaterBackground />}
+                        </div>
+                         <div className={`relative flex-1 flex flex-col min-h-0 ${page !== 'game' ? 'overflow-y-auto custom-scrollbar' : ''} ${showNavBar && page !== 'game' ? 'pb-20' : ''}`}>
+                            {showHeader && (
+                                <header className="p-4 flex items-center justify-between z-10">
+                                    <div className="w-20">
+                                        {showBackButton && (
+                                            <button onClick={handleBack} className="text-gray-600 font-semibold text-left text-shadow">&larr; Back</button>
+                                        )}
+                                    </div>
+                                    
+                                    <div className="flex items-center space-x-2 text-green-700">
+                                        <LogoBubble />
+                                        <span className="font-bold text-lg text-gray-800 text-shadow">Meno-Guide</span>
+                                    </div>
+                                    
+                                    <div className="w-20 flex justify-end">
+                                        {showSettings && (
+                                            <button onClick={() => setPage('settings')} className="text-gray-500 w-10 h-10 flex items-center justify-center rounded-full hover:bg-gray-100/50"><SettingsIcon className="w-6 h-6"/></button>
+                                        )}
+                                    </div>
+                                </header>
+                            )}
+                            {renderPage()}
+                        </div>
+                    </main>
+                    
+                    {showNavBar && 
+                        <nav className="absolute bottom-0 left-0 right-0 z-20 bg-white rounded-t-2xl shadow-[0_-10px_20px_-5px_rgba(0,0,0,0.1)]">
+                            <NavigationBar page={page} setPage={setPage} />
+                        </nav>
+                    }
+                </div>
+            );
+        }
+
+        const container = document.getElementById('root');
+        const root = ReactDOM.createRoot(container);
+        root.render(<App />);
+    </script>
+</body>
+</html>
+
