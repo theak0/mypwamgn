@@ -760,6 +760,46 @@
                 </div>
             );
         };
+        
+        const NotificationPromptScreen = ({ setPage }) => {
+            const handleAllow = async () => {
+                try {
+                    const permission = await Notification.requestPermission();
+                    console.log('Notification permission status:', permission);
+                    // We set the flag regardless of the outcome to not ask again.
+                    localStorage.setItem('notificationPromptHandled', 'true');
+                    // We can store the actual permission state in Firebase later if needed.
+                } catch (error) {
+                    console.error('Error requesting notification permission:', error);
+                    localStorage.setItem('notificationPromptHandled', 'true'); // Still mark as handled
+                } finally {
+                    setPage('relief-1'); // Proceed to the next step in any case
+                }
+            };
+
+            const handleDeny = () => {
+                localStorage.setItem('notificationPromptHandled', 'true');
+                setPage('relief-1');
+            };
+
+            return (
+                <div className="p-4 h-full flex flex-col justify-center">
+                    <div className="bg-white/80 backdrop-blur-md rounded-2xl p-6 text-center">
+                        <h2 className="text-3xl font-bold text-gray-800 mb-4">Stay on Track?</h2>
+                        <p className="text-lg text-gray-700 mb-6">To help you build a daily ritual, we can send one quiet reminder each evening to log your feelings. Is that okay?</p>
+                        <div className="space-y-4">
+                            <button onClick={handleAllow} className="w-full bg-green-500 text-white font-bold py-4 px-6 rounded-lg shadow-md hover:bg-green-600 transition-colors">
+                                Yes, Remind Me
+                            </button>
+                            <button onClick={handleDeny} className="w-full bg-transparent text-gray-600 font-semibold py-3 px-6 rounded-lg hover:bg-gray-100/50 transition-colors">
+                                No, Thanks
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            );
+        };
+
 
         const HomeScreen = ({ setPage, unlockAudio, deferredPrompt, setDeferredPrompt }) => {
             const [isInstalled, setIsInstalled] = useState(false);
@@ -780,7 +820,12 @@
 
             const handleReliefClick = () => {
                 unlockAudio();
-                setPage('relief-1');
+                const promptHandled = localStorage.getItem('notificationPromptHandled');
+                if (!promptHandled) {
+                    setPage('notification-prompt');
+                } else {
+                    setPage('relief-1');
+                }
             };
 
             const handleInstallClick = async () => {
@@ -1502,9 +1547,21 @@
             );
         };
         const SettingsScreen = ({ setPage, subscription }) => {
+            const [notificationPermission, setNotificationPermission] = useState(Notification.permission);
+            
             const handleLogout = () => {
                 window.firebase.signOut(window.firebase.auth).catch(error => console.error("Logout failed:", error));
                  window.location.reload();
+            };
+            
+             const handleNotificationToggle = async () => {
+                if (Notification.permission === 'default') {
+                    const permission = await Notification.requestPermission();
+                    setNotificationPermission(permission);
+                    localStorage.setItem('notificationPromptHandled', 'true');
+                } else if (Notification.permission === 'denied') {
+                    alert("Notifications are blocked. Please enable them in your browser or system settings to receive reminders.");
+                }
             };
             
             return (
@@ -1523,6 +1580,28 @@
                                     {subscription.plan || 'No Plan'}
                                 </p>
                                 <p className="text-gray-500 text-sm">{subscription.validity}</p>
+                            </div>
+                            
+                            <div className="p-4 bg-white rounded-lg shadow-sm">
+                                <h3 className="font-semibold text-gray-700">Notification Settings</h3>
+                                <div className="flex items-center justify-between mt-2">
+                                    <p className="text-gray-600">Daily Log Reminder</p>
+                                    <button 
+                                        onClick={handleNotificationToggle} 
+                                        disabled={notificationPermission === 'granted'}
+                                        className={`px-4 py-2 text-sm font-bold rounded-full transition-colors ${
+                                            notificationPermission === 'granted' ? 'bg-green-500 text-white cursor-not-allowed' : 
+                                            notificationPermission === 'denied' ? 'bg-red-400 text-white' : 
+                                            'bg-gray-300 text-gray-700 hover:bg-gray-400'
+                                        }`}
+                                    >
+                                        {notificationPermission === 'granted' ? 'Enabled' : 
+                                         notificationPermission === 'denied' ? 'Blocked' : 'Enable'}
+                                    </button>
+                                </div>
+                                {notificationPermission === 'denied' && (
+                                    <p className="text-xs text-red-500 mt-1">Notifications are blocked. You must enable them in browser settings.</p>
+                                )}
                             </div>
 
                             <div className="p-4 bg-white rounded-lg shadow-sm">
@@ -1662,6 +1741,7 @@
                             <GoogleIcon />
                             Sign in with Google
                         </button>
+                        <p className="mt-4 text-sm text-gray-600">Available on iOS, Android, and Web</p>
                          <div className="text-center mt-4 text-sm text-gray-500 italic">
                              <p>created with ❤️ For you...</p>
                              <p>-THE AK</p>
@@ -1794,7 +1874,8 @@
             }
             
             const handleBack = () => {
-                if(page === 'settings') {
+                if(page === 'settings' || page === 'relief-1') {
+                    setReliefState(null);
                     setPage('home');
                 } else if(page === 'relief-steps') {
                     setReliefState({ category: reliefState.category });
@@ -1826,6 +1907,7 @@
 
                 switch (page) {
                     case 'home': return <HomeScreen setPage={setPage} unlockAudio={unlockAudio} deferredPrompt={deferredPrompt} setDeferredPrompt={setDeferredPrompt} />;
+                    case 'notification-prompt': return <NotificationPromptScreen setPage={setPage} />;
                     case 'relief-1': return <ReliefFlowPage1 setReliefState={setReliefState} unlockAudio={unlockAudio} />;
                     case 'relief-2': return <ReliefFlowPage2 reliefState={reliefState} setReliefState={setReliefState} />;
                     case 'relief-steps': return <ReliefFlowStepScreen reliefState={reliefState} setPage={setPage} resetReliefFlow={resetReliefFlow} isAudioUnlocked={isAudioUnlocked} />;
@@ -1837,10 +1919,10 @@
                 }
             };
             
-            const showNavBar = isAuthReady && user && subscription?.status === 'active' && !['relief-steps'].includes(page);
-            const showSettings = isAuthReady && user && subscription?.status === 'active' && !['settings', 'game', 'login'].includes(page);
+            const showNavBar = isAuthReady && user && subscription?.status === 'active' && !['relief-steps', 'notification-prompt'].includes(page);
+            const showSettings = isAuthReady && user && subscription?.status === 'active' && !['settings', 'game', 'login', 'notification-prompt'].includes(page);
             const showBackButton = isAuthReady && user && subscription?.status === 'active' && (page.startsWith('relief') || page === 'settings');
-            const showHeader = isAuthReady && user && subscription?.status === 'active' && !['game', 'login'].includes(page);
+            const showHeader = isAuthReady && user && subscription?.status === 'active' && !['game', 'login', 'notification-prompt'].includes(page);
 
             // If subscription is not active, we don't want to show navbars or headers, just the subscription page.
              if (!isAuthReady || !user || !subscription || subscription.status !== 'active') {
