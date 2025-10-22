@@ -29,4 +29,16 @@ self.addEventListener('fetch', event => {
         return fetch(event.request); // Fetch from network
       })
   );
+
+});
+// This code should be in your sw.js file
+
+// When the new service worker is installing, this tells it to become active immediately.
+self.addEventListener('install', (event) => {
+  self.skipWaiting();
+});
+
+// After the new service worker is active, this tells it to take control of all open pages.
+self.addEventListener('activate', (event) => {
+  event.waitUntil(self.clients.claim());
 });
