@@ -15,8 +15,8 @@
     <script src="https://unpkg.com/react@18/umd/react.development.js"></script>
     <script src="https://unpkg.com/react-dom@18/umd/react-dom.development.js"></script>
     <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
-    <!-- PayPal SDK with your Sandbox Client ID -->
-    <script src="https://www.paypal.com/sdk/js?client-id=AfyJIoFJXhNceDKPAz_BgPnnp7NnoY3KqR1lTvlpWOP9Mvkbug-AoFNhSih7tOY3tRK3jv29lpnc1ky5&vault=true&intent=subscription"></script>
+    <!-- PayPal SDK with your LIVE Client ID -->
+    <script src="https://www.paypal.com/sdk/js?client-id=AUVwzOOiRr3mkPGBC4eU7nEyBThZCg2zuQcfixhH25tQz9RfrcuITyY9ji8ad0DYUme6GautP_sKDcvb&vault=true&intent=subscription"></script>
     
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
@@ -249,11 +249,11 @@
     <script type="text/babel">
         const { useState, useEffect, useRef, useCallback, useMemo } = React;
 
-        // --- PAYPAL PLAN IDs (SANDBOX) ---
+        // --- PAYPAL PLAN IDs (LIVE) ---
         const PAYPAL_PLAN_IDS = {
-          trial: 'P-2936578534012562KND2JN6Y',
-          yearly: 'P-7FK61399F5876832KND2JOMI',
-          monthly: 'P-4D37034808020190NND2JOWQ',
+          trial: 'P-1M654591RX8400113ND2IJAY',
+          yearly: 'P-7B414001034051515ND2IJ5I',
+          monthly: 'P-5FJ6787961781084GND2IK6A',
         };
 
         // --- STATIC SVG ICONS ---
@@ -1921,7 +1921,7 @@
             
             const showNavBar = isAuthReady && user && subscription?.status === 'active' && !['relief-steps', 'notification-prompt'].includes(page);
             const showSettings = isAuthReady && user && subscription?.status === 'active' && !['settings', 'game', 'login', 'notification-prompt'].includes(page);
-            const showBackButton = isAuthReady && user && subscription?.status === 'active' && (page.startsWith('relief') || page === 'settings');
+            const showBackButton = isAuthReady && user && subscription?.status === 'active' && (page.startsWith('relief') || page === 'settings' || page === 'notification-prompt');
             const showHeader = isAuthReady && user && subscription?.status === 'active' && !['game', 'login', 'notification-prompt'].includes(page);
 
             // If subscription is not active, we don't want to show navbars or headers, just the subscription page.
