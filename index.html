@@ -18,6 +18,16 @@
     <!-- PayPal SDK with your LIVE Client ID -->
     <script src="https://www.paypal.com/sdk/js?client-id=AUVwzOOiRr3mkPGBC4eU7nEyBThZCg2zuQcfixhH25tQz9RfrcuITyY9ji8ad0DYUme6GautP_sKDcvb&vault=true&intent=subscription"></script>
     
+    <!-- Google tag (gtag.js) -->
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-QEG0NG32D8"></script>
+    <script>
+      window.dataLayer = window.dataLayer || [];
+      function gtag(){dataLayer.push(arguments);}
+      gtag('js', new Date());
+
+      gtag('config', 'G-QEG0NG32D8');
+    </script>
+
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
         import { getAuth, GoogleAuthProvider, signInWithPopup, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
@@ -1777,6 +1787,17 @@
             const [user, setUser] = useState(null);
             const [subscription, setSubscription] = useState(null);
             const [isAuthReady, setIsAuthReady] = useState(false);
+
+            // Google Analytics Page View Tracking
+            useEffect(() => {
+                if (window.gtag) {
+                    window.gtag('event', 'page_view', {
+                        page_title: page,
+                        page_path: `/${page}`
+                    });
+                    console.log(`Tracked page view for: ${page}`);
+                }
+            }, [page]);
 
             useEffect(() => {
                 // PWA Install Prompt Handler
