@@ -1,1 +1,73 @@
+{
+  "name": "functions",
+  "description": "Meno-Guide Firebase Cloud Functions",
+  "scripts": {
+    "serve": "firebase emulators:start --only functions",
+    "shell": "firebase functions:shell",
+    "start": "npm run shell",
+    "deploy": "firebase deploy --only functions",
+    "logs": "firebase functions:log"
+  },
+  "engines": {
+    "node": "18"
+  },
+  "main": "index.js",
+  "dependencies": {
+    "@paypal/checkout-server-sdk": "^1.0.3",
+    "firebase-admin": "^11.8.0",
+    "firebase-functions": "^4.3.1"
+  },
+  "devDependencies": {
+    "firebase-functions-test": "^3.1.0"
+  },
+  "private": true
+}
+```
+
+### **2. Frontend Modification (`index.html`)**
+
+We need to tell PayPal *which* Firebase user is subscribing. We do this by adding the `custom_id` field when the subscription is created in the `SubscriptionGate` component.
+
+Find the `PayPalButtonComponent` within your `index.html` file (around line 980) and modify the `createSubscription` function like this:
+
+```javascript
+// Inside PayPalButtonComponent, within the useEffect hook:
+
+                        paypalButtonsInstance = window.paypal.Buttons({
+                            createSubscription: (data, actions) => {
+                                // Add the custom_id here
+                                return actions.subscription.create({
+                                    'plan_id': planId,
+                                    'custom_id': window.firebase.auth.currentUser ? window.firebase.auth.currentUser.uid : 'unknown_user' // Pass Firebase User ID
+                                });
+                            },
+                            onApprove: (data, actions) => {
+                                console.log('Subscription Approved:', data);
+                                alert('Thank you for subscribing! Your access has been unlocked.');
+                                onSubscribed(); // Call the function passed down from SubscriptionGate
+                            },
+                            // ... onError remains the same
+                        });
+```
+
+**Important:** You'll also need to pass the `user` object down to the `SubscriptionGate` component from the main `App` component so it has access to `user.uid`.
+
+Modify the `renderPage` function in your `App` component where it renders `SubscriptionGate`:
+
+```javascript
+// Inside App component's renderPage function (around line 2360):
+
+                // Subscription Gate: If subscription is not active, force to subscription page
+                if (subscription.status !== 'active') {
+                    // Pass the user object here
+                    return <SubscriptionGate user={user} onSubscribed={handleSubscriptionUpdate} trialUsed={subscription.trialUsed} />;
+                }
+```
+
+And update the `SubscriptionGate` component definition to receive the `user` prop:
+
+```javascript
+// Around line 979:
+        const SubscriptionGate = ({ user, onSubscribed, trialUsed }) => { // Add user here
+            // ... rest of the component code
 
