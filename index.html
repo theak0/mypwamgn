@@ -686,7 +686,7 @@
         };
 
 
-        const SubscriptionGate = ({ onSubscribed, trialUsed }) => {
+        const SubscriptionGate = ({ user, onSubscribed, trialUsed }) => {
             const [selectedPlan, setSelectedPlan] = useState(null);
             const [paypalError, setPaypalError] = useState(false);
 
@@ -712,10 +712,11 @@
                          <div className="w-full max-w-xs mx-auto">
                             {!paypalError ? (
                                 <PayPalButtonComponent 
-                                    planId={PAYPAL_PLAN_IDS[selectedPlan]} 
-                                    onSubscribed={() => onSubscribed(selectedPlan)}
-                                    onError={handlePayPalError}
-                                />
+								    user={user}
+								    planId={PAYPAL_PLAN_IDS[selectedPlan]} 
+								    onSubscribed={() => onSubscribed(selectedPlan)}
+								    onError={handlePayPalError}
+								/>
                             ) : (
                                 <div className="text-center p-4 text-red-500 font-semibold">
                                     Failed to load payment options. The preview environment may have limitations. Please try again or test in a live environment.
@@ -1922,7 +1923,7 @@
                 }
                 // Subscription Gate: If subscription is not active, force to subscription page
                 if (subscription.status !== 'active') {
-                    return <SubscriptionGate onSubscribed={handleSubscriptionUpdate} trialUsed={subscription.trialUsed} />;
+                    return <SubscriptionGate user={user} onSubscribed={handleSubscriptionUpdate} trialUsed={subscription.trialUsed} />;
                 }
 
 
@@ -2003,4 +2004,5 @@
     </script>
 </body>
 </html>
+
 
