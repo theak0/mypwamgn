@@ -640,7 +640,7 @@
 
         // --- CORE COMPONENTS ---
 
-        const PayPalButtonComponent = ({ planId, onSubscribed, onError }) => {
+        const PayPalButtonComponent = ({ user, planId, onSubscribed, onError }) => {
             const paypalRef = useRef();
 
             useEffect(() => {
@@ -648,9 +648,12 @@
                 
                 if (window.paypal && window.paypal.Buttons) {
                     paypalButtonsInstance = window.paypal.Buttons({
-                        createSubscription: (data, actions) => {
-                            return actions.subscription.create({ 'plan_id': planId });
-                        },
+						createSubscription: (data, actions) => {
+						    return actions.subscription.create({ 
+						        'plan_id': planId,
+						        'custom_id': user ? user.uid : 'unknown_user' // This is the critical link
+						    });
+						},
                         onApprove: (data, actions) => {
                             console.log('Subscription Approved:', data);
                             alert('Thank you for subscribing! Your access has been unlocked.');
@@ -2004,5 +2007,6 @@
     </script>
 </body>
 </html>
+
 
 
